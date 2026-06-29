@@ -1,9 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Phone, CalendarDays } from "lucide-react";
-import { PortfolioGallery } from "@/components/PortfolioGallery";
 import { ContactForm } from "@/components/ContactForm";
-import semtaLogo from "@/assets/semta-logo.jpg";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 import slide1 from "@/assets/semta-slide1.jpg";
+import slide2 from "@/assets/semta-slide2.jpg";
+import slide4 from "@/assets/semta-slide4.jpg";
 import craftsmanship from "@/assets/craftsmanship.jpg";
 
 export const Route = createFileRoute("/")({
@@ -25,46 +27,6 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
-
-function Brandmark({
-  className = "",
-  invert = false,
-  href,
-}: {
-  className?: string;
-  invert?: boolean;
-  href?: string;
-}) {
-  const gold = "text-[color:var(--color-gold-deep)]";
-  const sub = invert ? "text-white/70" : "text-muted-foreground";
-  const content = (
-    <>
-      <span className={`font-display text-2xl tracking-[0.35em] ${gold}`}>SEMTA</span>
-      <span className={`mt-2 text-[0.55rem] tracking-[0.4em] uppercase ${sub}`}>
-        Custom Cabinetry &amp; Design
-      </span>
-    </>
-  );
-
-  if (href) {
-    return (
-      <a
-        href={href}
-        className={`flex flex-col items-center leading-none transition-opacity hover:opacity-90 ${className}`}
-        onClick={(event) => {
-          if (window.location.pathname === href) {
-            event.preventDefault();
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }
-        }}
-      >
-        {content}
-      </a>
-    );
-  }
-
-  return <div className={`flex flex-col items-center leading-none ${className}`}>{content}</div>;
-}
 
 const services = [
   {
@@ -92,24 +54,7 @@ const services = [
 function Index() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Top Nav */}
-      <header className="absolute top-0 left-0 right-0 z-20">
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between px-8 py-7 md:px-14 md:py-9">
-          <span className="eyebrow text-white/90 hidden md:inline">Norwalk · Connecticut</span>
-          <Brandmark invert href="/" className="md:absolute md:left-1/2 md:-translate-x-1/2" />
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#portfolio" className="eyebrow text-white/90 link-underline">
-              Portfolio
-            </a>
-            <a href="#designers" className="eyebrow text-white/90 link-underline">
-              For Designers
-            </a>
-            <a href="#contact" className="eyebrow text-white/90 link-underline">
-              Contact
-            </a>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader overHero />
 
       {/* Hero */}
       <section className="relative h-screen min-h-[680px] w-full overflow-hidden">
@@ -143,9 +88,9 @@ function Index() {
               Book Appointment
             </a>
           </div>
-          <a href="#portfolio" className="mt-12 eyebrow link-underline text-white">
+          <Link to="/portfolio" className="mt-12 eyebrow link-underline text-white">
             View Our Work
-          </a>
+          </Link>
         </div>
       </section>
 
@@ -160,25 +105,58 @@ function Index() {
         </p>
       </section>
 
-      {/* Portfolio */}
-      <section id="portfolio" className="border-t border-border/60 px-6 py-28 md:px-14 md:py-36">
-        <div className="mx-auto max-w-[1400px]">
-          <div className="mx-auto max-w-2xl text-center">
-            <span className="eyebrow">Portfolio</span>
-            <h2 className="mt-6 font-display text-4xl md:text-5xl">Selected work by room.</h2>
-            <p className="mt-8 text-base leading-relaxed text-muted-foreground md:text-lg">
-              Browse kitchens, baths, bars and more - each project crafted in our Norwalk studio and
-              installed by our own team.
-            </p>
+      {/* Portfolio - Editorial split */}
+      <section id="portfolio" className="border-t border-border/60">
+        <div className="grid grid-cols-1 md:grid-cols-12">
+          <figure className="md:col-span-7">
+            <img
+              src={slide2}
+              alt="SEMTA custom kitchen project"
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
+          </figure>
+          <div className="md:col-span-5 flex items-center justify-center px-8 py-20 md:px-16 md:py-24">
+            <div className="max-w-md">
+              <span className="eyebrow">Selected Work</span>
+              <h2 className="mt-6 font-display text-4xl leading-tight md:text-5xl">
+                Kitchens tailored to the family that lives in them.
+              </h2>
+              <p className="mt-8 text-base leading-relaxed text-muted-foreground">
+                Every SEMTA kitchen is drawn from a single conversation about how you cook, gather
+                and live. We build the cabinetry, hardware and finishes around that - never the
+                other way around.
+              </p>
+              <Link to="/portfolio" className="eyebrow link-underline mt-10 inline-block">
+                View Full Portfolio
+              </Link>
+            </div>
           </div>
-          <div className="mt-16">
-            <PortfolioGallery />
+
+          <div className="md:col-span-5 flex items-center justify-center px-8 py-20 md:px-16 md:py-24 md:order-1">
+            <div className="max-w-md">
+              <span className="eyebrow">Norwalk Studio</span>
+              <h2 className="mt-6 font-display text-4xl leading-tight md:text-5xl">
+                Designed, built and installed by one team.
+              </h2>
+              <p className="mt-8 text-base leading-relaxed text-muted-foreground">
+                Locally owned and operated, SEMTA provides the highest-quality custom cabinetry for
+                residential and commercial locations. Any drawing or design can be modified to your
+                specific needs for new construction or remodel.
+              </p>
+              <a href="#services" className="eyebrow link-underline mt-10 inline-block">
+                Our Process
+              </a>
+            </div>
           </div>
-          <div className="mt-16 text-center">
-            <a href="#contact" className="eyebrow link-underline inline-block">
-              Begin a Project
-            </a>
-          </div>
+          <figure className="md:col-span-7 md:order-2">
+            <img
+              src={slide4}
+              alt="SEMTA custom cabinetry project"
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
+          </figure>
         </div>
       </section>
 
@@ -303,35 +281,7 @@ function Index() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border/60 bg-secondary/40">
-        <div className="mx-auto max-w-[1400px] px-6 py-16 md:px-14">
-          <div className="flex flex-col items-center gap-8">
-            <img src={semtaLogo} alt="SEMTA" className="h-16 w-16 rounded-full object-cover" />
-            <Brandmark />
-            <nav className="flex flex-wrap justify-center gap-x-10 gap-y-4">
-              <a href="#" className="eyebrow link-underline">
-                Home
-              </a>
-              <a href="#services" className="eyebrow link-underline">
-                About
-              </a>
-              <a href="#portfolio" className="eyebrow link-underline">
-                Portfolio
-              </a>
-              <a href="#designers" className="eyebrow link-underline">
-                For Designers
-              </a>
-              <a href="#contact" className="eyebrow link-underline">
-                Contact Us
-              </a>
-            </nav>
-            <p className="eyebrow text-muted-foreground">
-              © {new Date().getFullYear()} SEMTA · Custom Cabinetry &amp; Design
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
