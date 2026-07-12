@@ -99,7 +99,7 @@ function Index() {
             </a>
             <a
               href="#contact"
-              className="inline-flex items-center justify-center gap-2.5 bg-[color:var(--color-gold)] px-7 py-3.5 text-sm font-medium tracking-[0.15em] uppercase text-black transition-colors hover:bg-[color:var(--color-gold-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-black/30"
+              className="inline-flex items-center justify-center gap-2.5 bg-[color:var(--color-gold)] px-7 py-3.5 text-sm font-medium tracking-[0.15em] uppercase text-black transition-colors hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-black/30"
             >
               <CalendarDays className="h-4 w-4" aria-hidden="true" />
               Book Appointment
