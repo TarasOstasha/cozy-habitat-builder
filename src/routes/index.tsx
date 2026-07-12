@@ -1,8 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Phone, CalendarDays } from "lucide-react";
+import { Phone, CalendarDays, ArrowDown } from "lucide-react";
 import { ContactForm } from "@/components/ContactForm";
+import { PartnersSection } from "@/components/PartnersSection";
+import { SectionNav } from "@/components/SectionNav";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { WorkCarousel } from "@/components/WorkCarousel";
+import { WorkPreview } from "@/components/WorkPreview";
 import slide1 from "@/assets/semta-slide1.jpg";
 import slide2 from "@/assets/semta-slide2.jpg";
 import slide4 from "@/assets/semta-slide4.jpg";
@@ -51,51 +55,75 @@ const services = [
   },
 ];
 
+function scrollToPortfolio() {
+  const target = document.getElementById("portfolio");
+  if (!target) return;
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  target.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
+}
+
 function Index() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background pb-20 text-foreground lg:pb-0">
       <SiteHeader overHero />
+      <SectionNav />
 
       {/* Hero */}
-      <section className="relative h-screen min-h-[680px] w-full overflow-hidden">
+      <section
+        id="hero"
+        className="relative h-screen min-h-[680px] w-full overflow-hidden"
+        aria-label="Introduction"
+      >
         <img
           src={slide1}
           alt="SEMTA custom kitchen with grey cabinetry and patterned backsplash"
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/15 to-black/40" />
+        <div className="overlay-dark absolute inset-0" />
         <div className="relative z-10 flex h-full flex-col items-center justify-end pb-24 text-center text-white">
-          <span className="eyebrow text-white/80">
-            Custom Cabinetry · Residential &amp; Commercial
-          </span>
-          <h1 className="mt-6 max-w-4xl px-6 font-display text-5xl leading-[1.05] md:text-7xl">
+          <span className="eyebrow-on-dark">Custom Cabinetry · Residential &amp; Commercial</span>
+          <h1 className="text-on-dark mt-6 max-w-4xl px-6 font-display text-5xl leading-[1.05] md:text-7xl">
             Cabinetry, designed and built <br />
             <em className="not-italic text-[color:var(--color-gold)]">around the way you live.</em>
           </h1>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:gap-5">
             <a
               href="tel:+19177050712"
-              className="inline-flex items-center gap-2.5 border border-white/40 px-7 py-3.5 text-sm tracking-[0.2em] uppercase text-white transition-colors hover:border-white hover:bg-white/10"
+              className="inline-flex items-center gap-2.5 border border-white/60 px-7 py-3.5 text-sm tracking-[0.2em] uppercase text-white shadow-sm transition-colors hover:border-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/30"
             >
-              <Phone className="h-4 w-4" />
+              <Phone className="h-4 w-4" aria-hidden="true" />
               Call Us
             </a>
             <a
               href="#contact"
-              className="inline-flex items-center gap-2.5 bg-[color:var(--color-gold)] px-7 py-3.5 text-sm font-medium tracking-[0.15em] uppercase text-black transition-colors hover:bg-[color:var(--color-gold-hover)]"
+              className="inline-flex items-center gap-2.5 bg-[color:var(--color-gold)] px-7 py-3.5 text-sm font-medium tracking-[0.15em] uppercase text-black transition-colors hover:bg-[color:var(--color-gold-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-black/30"
             >
-              <CalendarDays className="h-4 w-4" />
+              <CalendarDays className="h-4 w-4" aria-hidden="true" />
               Book Appointment
             </a>
+            <button
+              type="button"
+              onClick={scrollToPortfolio}
+              className="inline-flex items-center gap-2.5 border border-white/25 bg-white/10 px-7 py-3.5 text-sm tracking-[0.15em] uppercase text-white backdrop-blur-sm transition-colors hover:border-white/50 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/30"
+            >
+              <ArrowDown className="h-4 w-4" aria-hidden="true" />
+              View Our Work
+            </button>
           </div>
-          <Link to="/portfolio" className="mt-12 eyebrow link-underline text-white">
-            View Our Work
+          <Link
+            to="/portfolio"
+            className="eyebrow-on-dark link-underline mt-8 inline-block opacity-90 hover:opacity-100"
+          >
+            Browse Full Portfolio
           </Link>
         </div>
       </section>
 
       {/* Statement */}
-      <section className="mx-auto max-w-3xl px-6 py-28 text-center md:py-40">
+      <section
+        id="specialization"
+        className="scroll-mt-24 mx-auto max-w-3xl px-6 py-28 text-center md:py-40"
+      >
         <span className="eyebrow">Our Specialization</span>
         <h2 className="mt-6 font-display text-4xl md:text-5xl">Residential Design</h2>
         <p className="mt-8 text-lg leading-relaxed text-muted-foreground md:text-xl">
@@ -105,35 +133,59 @@ function Index() {
         </p>
       </section>
 
-      {/* Portfolio - Editorial split */}
-      <section id="portfolio" className="border-t border-border/60">
-        <div className="grid grid-cols-1 md:grid-cols-12">
-          <figure className="md:col-span-7">
-            <img
-              src={slide2}
-              alt="SEMTA custom kitchen project"
-              loading="lazy"
-              className="h-full w-full object-cover"
-            />
-          </figure>
-          <div className="md:col-span-5 flex items-center justify-center px-8 py-20 md:px-16 md:py-24">
-            <div className="max-w-md">
-              <span className="eyebrow">Selected Work</span>
-              <h2 className="mt-6 font-display text-4xl leading-tight md:text-5xl">
-                Kitchens tailored to the family that lives in them.
+      {/* Early work preview */}
+      <WorkPreview onViewAll={scrollToPortfolio} />
+
+      {/* Portfolio */}
+      <section id="portfolio" className="scroll-mt-24 border-t border-border/60">
+        <div className="px-6 py-20 md:px-14 md:py-28">
+          <div className="mx-auto max-w-[1300px]">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="eyebrow">Our Work</span>
+              <h2 className="mt-6 font-display text-4xl md:text-5xl">
+                Kitchens tailored to the families that live in them.
               </h2>
-              <p className="mt-8 text-base leading-relaxed text-muted-foreground">
-                Every SEMTA kitchen is drawn from a single conversation about how you cook, gather
-                and live. We build the cabinetry, hardware and finishes around that - never the
-                other way around.
+              <p className="mt-8 text-base leading-relaxed text-muted-foreground md:text-lg">
+                Every SEMTA project begins with a conversation about how you cook, gather and live.
+                Browse a selection of recent work — each piece designed, built and installed by our
+                Norwalk team.
               </p>
-              <Link to="/portfolio" className="eyebrow link-underline mt-10 inline-block">
+            </div>
+            <div className="mt-16">
+              <WorkCarousel />
+            </div>
+            <div className="mt-12 text-center">
+              <Link to="/portfolio" className="eyebrow link-underline inline-block">
                 View Full Portfolio
               </Link>
             </div>
           </div>
+        </div>
 
-          <div className="md:col-span-5 flex items-center justify-center px-8 py-20 md:px-16 md:py-24 md:order-1">
+        {/* Editorial split — studio story */}
+        <div className="grid grid-cols-1 border-t border-border/60 md:grid-cols-12">
+          <figure className="md:col-span-7">
+            <img
+              src={slide2}
+              alt="SEMTA custom kitchen project with tailored cabinetry"
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
+          </figure>
+          <div className="flex items-center justify-center px-8 py-20 md:col-span-5 md:px-16 md:py-24">
+            <div className="max-w-md">
+              <span className="eyebrow">Selected Work</span>
+              <h2 className="mt-6 font-display text-4xl leading-tight md:text-5xl">
+                Precision in every detail.
+              </h2>
+              <p className="mt-8 text-base leading-relaxed text-muted-foreground">
+                We build the cabinetry, hardware and finishes around your life — never the other way
+                around. Every drawer, panel and finish is considered.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center px-8 py-20 md:order-1 md:col-span-5 md:px-16 md:py-24">
             <div className="max-w-md">
               <span className="eyebrow">Norwalk Studio</span>
               <h2 className="mt-6 font-display text-4xl leading-tight md:text-5xl">
@@ -149,10 +201,10 @@ function Index() {
               </a>
             </div>
           </div>
-          <figure className="md:col-span-7 md:order-2">
+          <figure className="md:order-2 md:col-span-7">
             <img
               src={slide4}
-              alt="SEMTA custom cabinetry project"
+              alt="SEMTA custom cabinetry installation in a Connecticut home"
               loading="lazy"
               className="h-full w-full object-cover"
             />
@@ -161,7 +213,10 @@ function Index() {
       </section>
 
       {/* Services */}
-      <section id="services" className="border-t border-border/60 px-6 py-28 md:px-14 md:py-36">
+      <section
+        id="services"
+        className="scroll-mt-24 border-t border-border/60 px-6 py-28 md:px-14 md:py-36"
+      >
         <div className="mx-auto max-w-[1300px]">
           <div className="text-center">
             <span className="eyebrow">Our Services</span>
@@ -184,57 +239,34 @@ function Index() {
       </section>
 
       {/* Craftsmanship */}
-      <section className="relative">
+      <section id="craftsmanship" className="scroll-mt-24 relative" aria-label="Craftsmanship">
         <img
           src={craftsmanship}
-          alt="A SEMTA craftsman at work"
+          alt="A SEMTA craftsman at work in the Norwalk studio"
           loading="lazy"
           className="h-[70vh] min-h-[520px] w-full object-cover"
         />
-        <div className="absolute inset-0 bg-black/45" />
+        <div className="overlay-dark-center absolute inset-0" />
         <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-white">
           <div className="max-w-2xl">
-            <span className="eyebrow text-white/85">Made in Norwalk</span>
-            <p className="mt-8 font-display text-3xl leading-[1.3] md:text-4xl">
+            <span className="eyebrow-on-dark">Made in Norwalk</span>
+            <p className="text-on-dark mt-8 font-display text-3xl leading-[1.3] md:text-4xl">
               "All installation is done by our own craftsmen - trained to ensure that your project
               is installed precisely."
             </p>
-            <p className="mt-8 eyebrow text-white/70">- The SEMTA Team</p>
+            <p className="eyebrow-on-dark mt-8 opacity-90">- The SEMTA Team</p>
           </div>
         </div>
       </section>
 
-      {/* For Designers */}
-      <section id="designers" className="border-t border-border/60 px-6 py-28 md:px-14 md:py-36">
-        <div className="mx-auto grid max-w-[1100px] grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-20">
-          <div>
-            <span className="eyebrow">For Designers</span>
-            <h2 className="mt-6 font-display text-4xl md:text-5xl">
-              A fabrication partner for your vision.
-            </h2>
-            <p className="mt-6 text-base leading-relaxed text-muted-foreground">
-              SEMTA works closely with interior designers, architects, and builders across
-              Connecticut. We translate detailed drawings into precision-built cabinetry - with
-              reliable timelines, open communication, and installation by our own team.
-            </p>
-            <ul className="mt-8 space-y-3 text-sm leading-relaxed text-muted-foreground">
-              <li>· Trade consultations and shop drawings</li>
-              <li>· Custom millwork for residential and commercial</li>
-              <li>· Material samples and finish coordination</li>
-            </ul>
-          </div>
-          <div>
-            <span className="eyebrow">Get in Touch</span>
-            <h3 className="mt-4 font-display text-2xl">Start a designer inquiry.</h3>
-            <div className="mt-8">
-              <ContactForm intent="designer" />
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Partners */}
+      <PartnersSection />
 
       {/* Contact */}
-      <section id="contact" className="border-t border-border/60 px-6 py-28 md:px-14 md:py-36">
+      <section
+        id="contact"
+        className="scroll-mt-24 border-t border-border/60 px-6 py-28 md:px-14 md:py-36"
+      >
         <div className="mx-auto max-w-[1100px]">
           <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-20">
             <div>

@@ -24,12 +24,9 @@ export function SiteHeader({ overHero = false }: { overHero?: boolean }) {
           <Link to="/portfolio" className={`eyebrow link-underline ${navClass}`}>
             Portfolio
           </Link>
-          <a
-            href={overHero ? "#designers" : "/#designers"}
-            className={`eyebrow link-underline ${navClass}`}
-          >
+          <Link to="/designers" className={`eyebrow link-underline ${navClass}`}>
             For Designers
-          </a>
+          </Link>
           <a
             href={overHero ? "#contact" : "/#contact"}
             className={`eyebrow link-underline ${navClass}`}

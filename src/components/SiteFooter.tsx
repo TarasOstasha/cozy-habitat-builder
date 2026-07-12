@@ -29,9 +29,9 @@ export function SiteFooter() {
             <Link to="/portfolio" className="eyebrow link-underline">
               Portfolio
             </Link>
-            <a href="/#designers" className="eyebrow link-underline">
+            <Link to="/designers" className="eyebrow link-underline">
               For Designers
-            </a>
+            </Link>
             <a href="/#contact" className="eyebrow link-underline">
               Contact Us
             </a>
