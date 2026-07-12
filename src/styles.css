@@ -158,3 +158,12 @@
 @utility overlay-dark-center {
   background: oklch(0 0 0 / 0.55);
 }
+
+@utility hero-scrim {
+  background: radial-gradient(
+    ellipse 60% 50% at 50% 52%,
+    oklch(0 0 0 / 0.62) 0%,
+    oklch(0 0 0 / 0.45) 45%,
+    oklch(0 0 0 / 0) 100%
+  );
+}

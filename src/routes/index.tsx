@@ -80,7 +80,8 @@ function Index() {
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="overlay-dark absolute inset-0" />
-        <div className="relative z-10 flex h-full flex-col items-center justify-end pb-24 text-center text-white">
+        <div className="hero-scrim absolute inset-0" />
+        <div className="relative z-10 flex h-full flex-col items-center justify-center pt-[8vh] text-center text-white">
           <span className="eyebrow-on-dark">Custom Cabinetry · Residential &amp; Commercial</span>
           <h1 className="text-on-dark mt-6 max-w-4xl px-6 font-display text-5xl leading-[1.05] md:text-7xl">
             Cabinetry, designed and built <br />
