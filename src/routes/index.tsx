@@ -81,23 +81,25 @@ function Index() {
         />
         <div className="overlay-dark absolute inset-0" />
         <div className="hero-scrim absolute inset-0" />
-        <div className="relative z-10 flex h-full flex-col items-center justify-center pt-[8vh] text-center text-white">
-          <span className="eyebrow-on-dark">Custom Cabinetry · Residential &amp; Commercial</span>
-          <h1 className="text-on-dark mt-6 max-w-4xl px-6 font-display text-5xl leading-[1.05] md:text-7xl">
-            Cabinetry, designed and built <br />
+        <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 pt-[6vh] text-center text-white">
+          <span className="eyebrow-on-dark max-w-full">
+            Custom Cabinetry · Residential &amp; Commercial
+          </span>
+          <h1 className="text-on-dark mt-6 max-w-4xl font-display text-4xl leading-[1.08] sm:text-5xl sm:leading-[1.05] md:text-7xl">
+            Cabinetry, designed and built <br className="hidden sm:block" />
             <em className="not-italic text-[color:var(--color-gold)]">around the way you live.</em>
           </h1>
-          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:gap-5">
+          <div className="mt-9 flex w-full max-w-xs flex-col items-stretch gap-3 sm:mt-10 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:gap-5">
             <a
               href="tel:+19177050712"
-              className="inline-flex items-center gap-2.5 border border-white/60 px-7 py-3.5 text-sm tracking-[0.2em] uppercase text-white shadow-sm transition-colors hover:border-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/30"
+              className="inline-flex items-center justify-center gap-2.5 border border-white/60 px-7 py-3.5 text-sm tracking-[0.2em] uppercase text-white shadow-sm transition-colors hover:border-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/30"
             >
               <Phone className="h-4 w-4" aria-hidden="true" />
               Call Us
             </a>
             <a
               href="#contact"
-              className="inline-flex items-center gap-2.5 bg-[color:var(--color-gold)] px-7 py-3.5 text-sm font-medium tracking-[0.15em] uppercase text-black transition-colors hover:bg-[color:var(--color-gold-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-black/30"
+              className="inline-flex items-center justify-center gap-2.5 bg-[color:var(--color-gold)] px-7 py-3.5 text-sm font-medium tracking-[0.15em] uppercase text-black transition-colors hover:bg-[color:var(--color-gold-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-black/30"
             >
               <CalendarDays className="h-4 w-4" aria-hidden="true" />
               Book Appointment
@@ -105,7 +107,7 @@ function Index() {
             <button
               type="button"
               onClick={scrollToPortfolio}
-              className="inline-flex items-center gap-2.5 border border-white/25 bg-white/10 px-7 py-3.5 text-sm tracking-[0.15em] uppercase text-white backdrop-blur-sm transition-colors hover:border-white/50 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/30"
+              className="inline-flex items-center justify-center gap-2.5 border border-white/25 bg-white/10 px-7 py-3.5 text-sm tracking-[0.15em] uppercase text-white backdrop-blur-sm transition-colors hover:border-white/50 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/30"
             >
               <ArrowDown className="h-4 w-4" aria-hidden="true" />
               View Our Work
