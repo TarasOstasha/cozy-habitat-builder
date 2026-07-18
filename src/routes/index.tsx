@@ -412,7 +412,6 @@ function Index() {
       ) : null}
 
       <SiteFooter
-        footerLogo={s.footerLogo}
         footerTagline={s.footerTagline}
         footerNavLinks={s.footerNavLinks}
       />

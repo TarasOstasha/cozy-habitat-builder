@@ -55,7 +55,6 @@ function DesignersPage() {
       </main>
 
       <SiteFooter
-        footerLogo={settings.footerLogo}
         footerTagline={settings.footerTagline}
         footerNavLinks={settings.footerNavLinks}
       />
