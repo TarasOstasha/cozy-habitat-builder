@@ -3,10 +3,32 @@ export type SanityImage = {
   alt?: string | null;
 };
 
+/** JSON-safe value for TanStack Start server-fn payloads. */
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
 export type FooterNavLink = {
   _key: string;
   label?: string | null;
   href?: string | null;
+};
+
+export type PageSeo = {
+  title?: string | null;
+  description?: string | null;
+  keywords?: string[] | null;
+  canonicalUrl?: string | null;
+  ogTitle?: string | null;
+  ogDescription?: string | null;
+  image?: SanityImage | null;
+  twitterCard?: "summary" | "summary_large_image" | string | null;
+  noIndex?: boolean | null;
+  noFollow?: boolean | null;
 };
 
 export type SiteSettings = {
@@ -20,8 +42,12 @@ export type SiteSettings = {
   email?: string | null;
   addressLine1?: string | null;
   addressLine2?: string | null;
+  siteUrl?: string | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
+  seoImage?: SanityImage | null;
+  ogSiteName?: string | null;
+  twitterHandle?: string | null;
 };
 
 export type SectionIntro = {
@@ -47,12 +73,7 @@ export type WorkPreviewProject = {
 };
 
 export type HomePage = {
-  seo?: {
-    title?: string | null;
-    description?: string | null;
-    ogTitle?: string | null;
-    ogDescription?: string | null;
-  } | null;
+  seo?: PageSeo | null;
   hero?: {
     enabled?: boolean | null;
     eyebrow?: string | null;
@@ -115,6 +136,32 @@ export type PartnerDoc = {
   url?: string | null;
   enabled?: boolean | null;
   logo?: SanityImage | null;
+};
+
+export type PortfolioCategoryDoc = {
+  _key: string;
+  title?: string | null;
+  slug?: { current?: string | null } | null;
+  descriptionMode?: "richText" | "html" | string | null;
+  /** Portable Text blocks from Sanity (structured JSON). */
+  description?: JsonValue[] | null;
+  descriptionHtml?: string | null;
+  images?: SanityImage[] | null;
+};
+
+export type PortfolioPage = {
+  seo?: PageSeo | null;
+  eyebrow?: string | null;
+  title?: string | null;
+  body?: string | null;
+  ctaLabel?: string | null;
+  ctaHref?: string | null;
+  categories?: PortfolioCategoryDoc[] | null;
+};
+
+export type PortfolioPagePayload = {
+  settings: SiteSettings | null;
+  portfolio: PortfolioPage | null;
 };
 
 export type HomePagePayload = {

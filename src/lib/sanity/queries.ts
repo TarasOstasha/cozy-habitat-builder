@@ -8,6 +8,19 @@ const imageProjection = /* groq */ `
   alt
 `;
 
+const seoProjection = /* groq */ `
+  title,
+  description,
+  keywords,
+  canonicalUrl,
+  ogTitle,
+  ogDescription,
+  image{ ${imageProjection} },
+  twitterCard,
+  noIndex,
+  noFollow
+`;
+
 export const HOME_PAGE_QUERY = defineQuery(/* groq */ `
   {
     "settings": *[_type == "siteSettings"][0]{
@@ -21,11 +34,15 @@ export const HOME_PAGE_QUERY = defineQuery(/* groq */ `
       email,
       addressLine1,
       addressLine2,
+      siteUrl,
       seoTitle,
-      seoDescription
+      seoDescription,
+      seoImage{ ${imageProjection} },
+      ogSiteName,
+      twitterHandle
     },
     "home": *[_type == "homePage"][0]{
-      seo,
+      seo{ ${seoProjection} },
       hero{
         enabled,
         eyebrow,
@@ -94,6 +111,46 @@ export const HOME_PAGE_QUERY = defineQuery(/* groq */ `
       name,
       url,
       logo{ ${imageProjection} }
+    }
+  }
+`);
+
+export const PORTFOLIO_PAGE_QUERY = defineQuery(/* groq */ `
+  {
+    "settings": *[_type == "siteSettings"][0]{
+      brandName,
+      locationLabel,
+      footerLogo{ ${imageProjection} },
+      footerTagline,
+      footerNavLinks[]{ _key, label, href },
+      phoneDisplay,
+      phoneHref,
+      email,
+      addressLine1,
+      addressLine2,
+      siteUrl,
+      seoTitle,
+      seoDescription,
+      seoImage{ ${imageProjection} },
+      ogSiteName,
+      twitterHandle
+    },
+    "portfolio": *[_type == "portfolioPage"][0]{
+      seo{ ${seoProjection} },
+      eyebrow,
+      title,
+      body,
+      ctaLabel,
+      ctaHref,
+      categories[]{
+        _key,
+        title,
+        slug,
+        descriptionMode,
+        description,
+        descriptionHtml,
+        images[]{ ${imageProjection} }
+      }
     }
   }
 `);

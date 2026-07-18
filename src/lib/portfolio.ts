@@ -1,3 +1,5 @@
+import type { PortableTextBlock } from "@portabletext/types";
+
 const modules = import.meta.glob("../assets/**/*.{webp,jpeg,jpg,png}", {
   eager: true,
   import: "default",
@@ -15,10 +17,29 @@ function imagesInFolder(folder: string): string[] {
 export type PortfolioCategory = {
   id: string;
   label: string;
+  descriptionMode?: "richText" | "html";
+  description?: PortableTextBlock[];
+  descriptionHtml?: string;
   images: string[];
 };
 
-export const portfolioCategories: PortfolioCategory[] = [
+export type GalleryImage = {
+  key: string;
+  src: string;
+  alt: string;
+};
+
+export type GalleryCategory = {
+  id: string;
+  label: string;
+  descriptionMode?: "richText" | "html";
+  description?: PortableTextBlock[];
+  descriptionHtml?: string;
+  images: GalleryImage[];
+};
+
+/** Local asset folders used as offline / empty-CMS fallback. */
+export const localPortfolioCategories: PortfolioCategory[] = [
   {
     id: "kitchen-ashton",
     label: "Kitchen · Ashton",
@@ -51,4 +72,22 @@ export const portfolioCategories: PortfolioCategory[] = [
   },
 ].filter((category) => category.images.length > 0);
 
-export const portfolioImages = portfolioCategories.flatMap((category) => category.images);
+/** @deprecated Prefer localPortfolioCategories */
+export const portfolioCategories = localPortfolioCategories;
+
+export const portfolioImages = localPortfolioCategories.flatMap((category) => category.images);
+
+export function galleryFromLocal(categories: PortfolioCategory[] = localPortfolioCategories): GalleryCategory[] {
+  return categories.map((category) => ({
+    id: category.id,
+    label: category.label,
+    descriptionMode: category.descriptionMode,
+    description: category.description,
+    descriptionHtml: category.descriptionHtml,
+    images: category.images.map((src, index) => ({
+      key: `${category.id}-${index}`,
+      src,
+      alt: `${category.label} project ${index + 1}`,
+    })),
+  }));
+}

@@ -28,14 +28,8 @@ export const homePage = defineType({
     defineField({
       name: 'seo',
       title: 'Page SEO',
-      type: 'object',
+      type: 'seo',
       group: 'seo',
-      fields: [
-        defineField({name: 'title', title: 'Title', type: 'string'}),
-        defineField({name: 'description', title: 'Description', type: 'text', rows: 3}),
-        defineField({name: 'ogTitle', title: 'Open Graph title', type: 'string'}),
-        defineField({name: 'ogDescription', title: 'Open Graph description', type: 'text', rows: 3}),
-      ],
     }),
 
     defineField({

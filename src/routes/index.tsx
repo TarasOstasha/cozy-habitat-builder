@@ -14,28 +14,21 @@ import craftsmanshipFallback from "@/assets/craftsmanship.jpg";
 import { defaultHome, defaultSettings, isSectionEnabled, pick } from "@/lib/sanity/defaults";
 import { fetchHomePage } from "@/lib/sanity/fetch";
 import { sanityImageUrl } from "@/lib/sanity/image";
+import { buildSeoHead } from "@/lib/sanity/seo-head";
 import { landingSections } from "@/lib/landing-sections";
 
 export const Route = createFileRoute("/")({
   loader: () => fetchHomePage(),
-  head: ({ loaderData }) => {
-    const seo = loaderData?.home?.seo;
-    const settings = loaderData?.settings;
-    const title = seo?.title || settings?.seoTitle || defaultHome.seo?.title || "";
-    const description =
-      seo?.description || settings?.seoDescription || defaultHome.seo?.description || "";
-    const ogTitle = seo?.ogTitle || title;
-    const ogDescription = seo?.ogDescription || description;
-
-    return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { property: "og:title", content: ogTitle },
-        { property: "og:description", content: ogDescription },
-      ],
-    };
-  },
+  head: ({ loaderData }) =>
+    buildSeoHead({
+      seo: loaderData?.home?.seo,
+      settings: loaderData?.settings,
+      fallbacks: {
+        title: defaultHome.seo?.title || undefined,
+        description: defaultHome.seo?.description || undefined,
+        twitterCard: defaultHome.seo?.twitterCard || undefined,
+      },
+    }),
   component: Index,
 });
 

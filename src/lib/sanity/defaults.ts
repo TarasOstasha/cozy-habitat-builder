@@ -1,4 +1,10 @@
-import type { FooterNavLink, HomePage, PartnerDoc, SiteSettings } from "./types";
+import type {
+  FooterNavLink,
+  HomePage,
+  PartnerDoc,
+  PortfolioPage,
+  SiteSettings,
+} from "./types";
 
 /** Local fallbacks so the site still renders if Sanity is empty or offline. */
 export const defaultFooterNavLinks: FooterNavLink[] = [
@@ -19,9 +25,31 @@ export const defaultSettings: SiteSettings = {
   email: "semtaccd@gmail.com",
   addressLine1: "257 Ely Ave",
   addressLine2: "Norwalk, CT 06854",
+  siteUrl: "https://www.semtaccd.shop",
   seoTitle: "SEMTA - Custom Cabinetry & Design · Norwalk, CT",
   seoDescription:
     "SEMTA designs, builds and installs the highest-quality custom cabinetry for residential and commercial spaces. Locally owned and operated in Norwalk, CT.",
+  ogSiteName: "SEMTA",
+};
+
+export const defaultPortfolio: PortfolioPage = {
+  seo: {
+    title: "Portfolio · SEMTA Custom Cabinetry & Design",
+    description:
+      "Browse SEMTA custom cabinetry projects — kitchens, bathrooms, bars, mudrooms and more. Built in Norwalk, CT.",
+    ogTitle: "SEMTA Portfolio",
+    ogDescription:
+      "Browse kitchens, baths, bars and more — each project crafted in our Norwalk studio.",
+    twitterCard: "summary_large_image",
+    noIndex: false,
+    noFollow: false,
+  },
+  eyebrow: "Portfolio",
+  title: "Selected work by room.",
+  body: "Browse kitchens, baths, bars and more — each project crafted in our Norwalk studio and installed by our own team.",
+  ctaLabel: "Begin a Project",
+  ctaHref: "/#contact",
+  categories: [],
 };
 
 export const defaultHome: HomePage = {
@@ -32,6 +60,9 @@ export const defaultHome: HomePage = {
     ogTitle: "SEMTA - Custom Cabinetry & Design",
     ogDescription:
       "Locally owned custom cabinetry studio in Norwalk, CT. Initial Consultation · Custom Design · Build · Delivery & Installation.",
+    twitterCard: "summary_large_image",
+    noIndex: false,
+    noFollow: false,
   },
   hero: {
     enabled: true,

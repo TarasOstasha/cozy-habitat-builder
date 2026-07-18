@@ -1,0 +1,114 @@
+import type { PageSeo, JsonValue, SanityImage, SiteSettings } from "./types";
+import { sanityImageUrl } from "./image";
+import type { GalleryCategory } from "@/lib/portfolio";
+
+type SeoHeadInput = {
+  seo?: PageSeo | null;
+  settings?: SiteSettings | null;
+  fallbacks?: {
+    title?: string;
+    description?: string;
+    twitterCard?: string;
+  };
+};
+
+export function buildSeoHead({ seo, settings, fallbacks }: SeoHeadInput) {
+  const title = seo?.title || settings?.seoTitle || fallbacks?.title || "";
+  const description =
+    seo?.description || settings?.seoDescription || fallbacks?.description || "";
+  const ogTitle = seo?.ogTitle || title;
+  const ogDescription = seo?.ogDescription || description;
+  const siteName = settings?.ogSiteName || settings?.brandName || "";
+  const twitterCard = seo?.twitterCard || fallbacks?.twitterCard || "summary_large_image";
+  const ogImage =
+    sanityImageUrl(seo?.image, 1200, 630) ||
+    sanityImageUrl(settings?.seoImage, 1200, 630) ||
+    undefined;
+  const ogImageAlt = seo?.image?.alt || settings?.seoImage?.alt || siteName;
+  const canonicalUrl = seo?.canonicalUrl || undefined;
+  const robotsParts = [seo?.noIndex ? "noindex" : "index", seo?.noFollow ? "nofollow" : "follow"];
+  const twitterHandle = settings?.twitterHandle
+    ? `@${settings.twitterHandle.replace(/^@/, "")}`
+    : undefined;
+
+  return {
+    meta: [
+      { title },
+      { name: "description", content: description },
+      ...(seo?.keywords?.length ? [{ name: "keywords", content: seo.keywords.join(", ") }] : []),
+      { name: "robots", content: robotsParts.join(", ") },
+      { property: "og:type", content: "website" },
+      { property: "og:title", content: ogTitle },
+      { property: "og:description", content: ogDescription },
+      ...(siteName ? [{ property: "og:site_name", content: siteName }] : []),
+      ...(ogImage
+        ? [
+            { property: "og:image", content: ogImage },
+            { property: "og:image:alt", content: ogImageAlt },
+            { property: "og:image:width", content: "1200" },
+            { property: "og:image:height", content: "630" },
+          ]
+        : []),
+      { name: "twitter:card", content: twitterCard },
+      { name: "twitter:title", content: ogTitle },
+      { name: "twitter:description", content: ogDescription },
+      ...(twitterHandle ? [{ name: "twitter:site", content: twitterHandle }] : []),
+      ...(ogImage
+        ? [
+            { name: "twitter:image", content: ogImage },
+            { name: "twitter:image:alt", content: ogImageAlt },
+          ]
+        : []),
+    ],
+    links: canonicalUrl ? [{ rel: "canonical", href: canonicalUrl }] : undefined,
+  };
+}
+
+export function galleryFromSanity(
+  categories:
+    | Array<{
+        _key?: string;
+        title?: string | null;
+        slug?: { current?: string | null } | null;
+        descriptionMode?: "richText" | "html" | string | null;
+        description?: JsonValue[] | null;
+        descriptionHtml?: string | null;
+        images?: SanityImage[] | null;
+      }>
+    | null
+    | undefined,
+): GalleryCategory[] {
+  if (!categories?.length) return [];
+
+  return categories
+    .map((category, categoryIndex) => {
+      const id = category.slug?.current || category._key || `category-${categoryIndex}`;
+      const label = category.title || "Untitled";
+      const images = (category.images ?? [])
+        .map((image, imageIndex) => {
+          const src = sanityImageUrl(image, 1600);
+          if (!src) return null;
+          return {
+            key: `${id}-${imageIndex}`,
+            src,
+            alt: image.alt || `${label} project ${imageIndex + 1}`,
+          };
+        })
+        .filter((image): image is { key: string; src: string; alt: string } => image !== null);
+
+      const mode: "richText" | "html" =
+        category.descriptionMode === "html" ? "html" : "richText";
+
+      return {
+        id,
+        label,
+        descriptionMode: mode,
+        description: Array.isArray(category.description)
+          ? (category.description as unknown as GalleryCategory["description"])
+          : undefined,
+        descriptionHtml: category.descriptionHtml || undefined,
+        images,
+      };
+    })
+    .filter((category) => category.images.length > 0);
+}

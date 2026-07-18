@@ -2,55 +2,68 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PortfolioGallery } from "@/components/PortfolioGallery";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { fetchSiteSettings } from "@/lib/sanity/fetch";
+import { galleryFromLocal } from "@/lib/portfolio";
+import { defaultPortfolio, defaultSettings, pick } from "@/lib/sanity/defaults";
+import { fetchPortfolioPage } from "@/lib/sanity/fetch";
+import { buildSeoHead, galleryFromSanity } from "@/lib/sanity/seo-head";
 
 export const Route = createFileRoute("/portfolio")({
-  loader: () => fetchSiteSettings(),
-  head: () => ({
-    meta: [
-      { title: "Portfolio · SEMTA Custom Cabinetry & Design" },
-      {
-        name: "description",
-        content:
-          "Browse SEMTA custom cabinetry projects — kitchens, bathrooms, bars, mudrooms and more. Built in Norwalk, CT.",
+  loader: () => fetchPortfolioPage(),
+  head: ({ loaderData }) =>
+    buildSeoHead({
+      seo: loaderData?.portfolio?.seo,
+      settings: loaderData?.settings,
+      fallbacks: {
+        title: defaultPortfolio.seo?.title || undefined,
+        description: defaultPortfolio.seo?.description || undefined,
+        twitterCard: defaultPortfolio.seo?.twitterCard || undefined,
       },
-    ],
-  }),
+    }),
   component: PortfolioPage,
 });
 
 function PortfolioPage() {
-  const settings = Route.useLoaderData();
+  const { settings, portfolio } = Route.useLoaderData();
+  const s = settings ?? defaultSettings;
+  const p = portfolio ?? defaultPortfolio;
+
+  const categoriesFromSanity = galleryFromSanity(p.categories);
+  const categories =
+    categoriesFromSanity.length > 0 ? categoriesFromSanity : galleryFromLocal();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader locationLabel={settings.locationLabel} />
+      <SiteHeader locationLabel={s.locationLabel} />
 
       <main className="px-6 py-20 md:px-14 md:py-28">
         <div className="mx-auto max-w-[1400px]">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="eyebrow">Portfolio</span>
-            <h1 className="mt-6 font-display text-4xl md:text-5xl">Selected work by room.</h1>
+            <span className="eyebrow">{pick(p.eyebrow, defaultPortfolio.eyebrow!)}</span>
+            <h1 className="mt-6 font-display text-4xl md:text-5xl">
+              {pick(p.title, defaultPortfolio.title!)}
+            </h1>
             <p className="mt-8 text-base leading-relaxed text-muted-foreground md:text-lg">
-              Browse kitchens, baths, bars and more — each project crafted in our Norwalk studio and
-              installed by our own team.
+              {pick(p.body, defaultPortfolio.body!)}
             </p>
           </div>
           <div className="mt-16">
-            <PortfolioGallery />
+            <PortfolioGallery categories={categories} />
           </div>
           <div className="mt-16 text-center">
-            <a href="/#contact" className="eyebrow link-underline inline-block">
-              Begin a Project
+            <a
+              href={pick(p.ctaHref, defaultPortfolio.ctaHref!)}
+              className="eyebrow link-underline inline-block"
+            >
+              {pick(p.ctaLabel, defaultPortfolio.ctaLabel!)}
             </a>
           </div>
         </div>
       </main>
 
       <SiteFooter
-        footerLogo={settings.footerLogo}
-        footerTagline={settings.footerTagline}
-        footerNavLinks={settings.footerNavLinks}
+        footerLogo={s.footerLogo}
+        footerTagline={s.footerTagline}
+        footerNavLinks={s.footerNavLinks}
       />
     </div>
   );

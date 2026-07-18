@@ -111,16 +111,59 @@ export const siteSettings = defineType({
       group: 'contact',
     }),
     defineField({
+      name: 'siteUrl',
+      title: 'Site URL',
+      type: 'url',
+      description: 'Public site origin used for canonical and Open Graph URLs (e.g. https://www.example.com)',
+      group: 'seo',
+      validation: (rule) =>
+        rule.uri({scheme: ['http', 'https']}).warning('Use a full URL starting with https://'),
+    }),
+    defineField({
       name: 'seoTitle',
       title: 'Default SEO title',
       type: 'string',
       group: 'seo',
+      validation: (rule) =>
+        rule.max(60).warning('Keep under 60 characters for best display in search results'),
     }),
     defineField({
       name: 'seoDescription',
       title: 'Default SEO description',
       type: 'text',
       rows: 3,
+      group: 'seo',
+      validation: (rule) =>
+        rule.max(160).warning('Keep under 160 characters for best display in search results'),
+    }),
+    defineField({
+      name: 'seoImage',
+      title: 'Default social share image',
+      type: 'image',
+      description: 'Fallback Open Graph / Twitter image (1200×630 recommended)',
+      group: 'seo',
+      options: {hotspot: true},
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Alternative text',
+          type: 'string',
+          validation: (rule) => rule.warning('Add alt text for accessibility and SEO'),
+        }),
+      ],
+    }),
+    defineField({
+      name: 'ogSiteName',
+      title: 'Open Graph site name',
+      type: 'string',
+      description: 'Shown as the site name in social previews',
+      group: 'seo',
+    }),
+    defineField({
+      name: 'twitterHandle',
+      title: 'Twitter / X handle',
+      type: 'string',
+      description: 'Without @, e.g. semta',
       group: 'seo',
     }),
   ],

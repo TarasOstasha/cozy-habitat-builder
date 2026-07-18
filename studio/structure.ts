@@ -1,6 +1,6 @@
 import type {StructureResolver} from 'sanity/structure'
 
-const singletonTypes = new Set(['siteSettings', 'homePage'])
+const singletonTypes = new Set(['siteSettings', 'homePage', 'portfolioPage'])
 
 export const structure: StructureResolver = (S) =>
   S.list()
@@ -14,6 +14,10 @@ export const structure: StructureResolver = (S) =>
         .title('Home Page')
         .id('homePage')
         .child(S.document().schemaType('homePage').documentId('homePage')),
+      S.listItem()
+        .title('Portfolio Page')
+        .id('portfolioPage')
+        .child(S.document().schemaType('portfolioPage').documentId('portfolioPage')),
       S.divider(),
       ...S.documentTypeListItems().filter((item) => !singletonTypes.has(item.getId() ?? '')),
     ])

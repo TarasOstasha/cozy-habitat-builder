@@ -1,8 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sanityClient } from "./client";
-import { defaultHome, defaultPartners, defaultSettings } from "./defaults";
-import { HOME_PAGE_QUERY } from "./queries";
-import type { HomePagePayload, SiteSettings } from "./types";
+import {
+  defaultHome,
+  defaultPartners,
+  defaultPortfolio,
+  defaultSettings,
+} from "./defaults";
+import { HOME_PAGE_QUERY, PORTFOLIO_PAGE_QUERY } from "./queries";
+import type { HomePagePayload, PortfolioPagePayload, SiteSettings } from "./types";
 
 export const fetchHomePage = createServerFn({ method: "GET" }).handler(
   async (): Promise<HomePagePayload> => {
@@ -19,6 +24,24 @@ export const fetchHomePage = createServerFn({ method: "GET" }).handler(
         settings: defaultSettings,
         home: defaultHome,
         partnersList: defaultPartners,
+      };
+    }
+  },
+);
+
+export const fetchPortfolioPage = createServerFn({ method: "GET" }).handler(
+  async (): Promise<PortfolioPagePayload> => {
+    try {
+      const data = await sanityClient.fetch<PortfolioPagePayload>(PORTFOLIO_PAGE_QUERY);
+      return {
+        settings: data.settings ?? defaultSettings,
+        portfolio: data.portfolio ?? defaultPortfolio,
+      };
+    } catch (error) {
+      console.error("Failed to fetch Sanity portfolio page content", error);
+      return {
+        settings: defaultSettings,
+        portfolio: defaultPortfolio,
       };
     }
   },
@@ -42,8 +65,15 @@ export const fetchSiteSettings = createServerFn({ method: "GET" }).handler(
           email,
           addressLine1,
           addressLine2,
+          siteUrl,
           seoTitle,
-          seoDescription
+          seoDescription,
+          seoImage{
+            asset->{ _id, url },
+            alt
+          },
+          ogSiteName,
+          twitterHandle
         }
       `);
       return settings ?? defaultSettings;

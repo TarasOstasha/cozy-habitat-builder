@@ -1,25 +1,66 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { portfolioCategories } from "@/lib/portfolio";
+import { CategoryDescription } from "@/components/CategoryDescription";
+import type { GalleryCategory } from "@/lib/portfolio";
 
-export function PortfolioGallery() {
-  const [activeId, setActiveId] = useState(portfolioCategories[0]?.id ?? "");
+const VISIBLE_CATEGORIES = 6;
+
+type PortfolioGalleryProps = {
+  categories: GalleryCategory[];
+};
+
+export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
+  const [activeId, setActiveId] = useState(categories[0]?.id ?? "");
+  const [startIndex, setStartIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const maxStart = Math.max(0, categories.length - VISIBLE_CATEGORIES);
+  const showCategoryNav = categories.length > VISIBLE_CATEGORIES;
+  const visibleCategories = showCategoryNav
+    ? categories.slice(startIndex, startIndex + VISIBLE_CATEGORIES)
+    : categories;
+  const canPrev = startIndex > 0;
+  const canNext = startIndex < maxStart;
+
+  useEffect(() => {
+    if (!categories.some((category) => category.id === activeId)) {
+      setActiveId(categories[0]?.id ?? "");
+    }
+  }, [categories, activeId]);
+
+  useEffect(() => {
+    setStartIndex((current) => Math.min(current, maxStart));
+  }, [maxStart]);
+
+  useEffect(() => {
+    const activeIndex = categories.findIndex((category) => category.id === activeId);
+    if (activeIndex < 0 || categories.length <= VISIBLE_CATEGORIES) return;
+
+    setStartIndex((current) => {
+      if (activeIndex < current) return activeIndex;
+      if (activeIndex >= current + VISIBLE_CATEGORIES) {
+        return activeIndex - VISIBLE_CATEGORIES + 1;
+      }
+      return current;
+    });
+  }, [activeId, categories]);
+
   const activeCategory =
-    portfolioCategories.find((category) => category.id === activeId) ?? portfolioCategories[0];
+    categories.find((category) => category.id === activeId) ?? categories[0];
 
   const isOpen = lightboxIndex !== null && activeCategory !== undefined;
   const slideCount = activeCategory?.images.length ?? 0;
   const currentIndex = lightboxIndex ?? 0;
-  const currentSrc = activeCategory?.images[currentIndex];
-  const currentAlt = activeCategory
-    ? `${activeCategory.label} project ${currentIndex + 1}`
-    : "";
+  const currentImage = activeCategory?.images[currentIndex];
 
   const goToSlide = (index: number) => {
     if (!activeCategory) return;
     const nextIndex = (index + activeCategory.images.length) % activeCategory.images.length;
     setLightboxIndex(nextIndex);
+  };
+
+  const scrollCategoriesBy = (step: number) => {
+    setStartIndex((current) => Math.min(maxStart, Math.max(0, current + step)));
   };
 
   useEffect(() => {
@@ -62,64 +103,92 @@ export function PortfolioGallery() {
   return (
     <>
       <div>
-        <div className="flex flex-wrap justify-center gap-x-6 gap-y-3">
-          {portfolioCategories.map((category) => (
+        <div className="flex items-center justify-center gap-2 sm:gap-3">
+          {showCategoryNav && (
             <button
-              key={category.id}
               type="button"
-              onClick={() => setActiveId(category.id)}
-              className={`eyebrow cursor-pointer transition-colors ${
-                category.id === activeId
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-              aria-pressed={category.id === activeId}
+              onClick={() => scrollCategoriesBy(-1)}
+              disabled={!canPrev}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
+              aria-label="Previous categories"
             >
-              {category.label}
-              <span className="ml-1.5 text-muted-foreground/70">({category.images.length})</span>
+              <ChevronLeft className="h-5 w-5" />
             </button>
-          ))}
+          )}
+
+          <div className="flex min-w-0 flex-1 flex-nowrap items-center justify-center gap-x-4 overflow-hidden sm:gap-x-6 md:gap-x-8">
+            {visibleCategories.map((category) => (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => setActiveId(category.id)}
+                className={`eyebrow shrink-0 cursor-pointer whitespace-nowrap transition-colors ${
+                  category.id === activeId
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                aria-pressed={category.id === activeId}
+              >
+                {category.label}
+                <span className="ml-1.5 text-muted-foreground/70">({category.images.length})</span>
+              </button>
+            ))}
+          </div>
+
+          {showCategoryNav && (
+            <button
+              type="button"
+              onClick={() => scrollCategoriesBy(1)}
+              disabled={!canNext}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
+              aria-label="Next categories"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
-        <div className="mt-14 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {activeCategory.images.map((src, index) => {
-            const alt = `${activeCategory.label} project ${index + 1}`;
+        <CategoryDescription
+          mode={activeCategory.descriptionMode}
+          richText={activeCategory.description}
+          html={activeCategory.descriptionHtml}
+        />
 
-            return (
-              <figure
-                key={src}
-                className={`overflow-hidden bg-secondary/30 ${
-                  index % 5 === 0 ? "sm:col-span-2 sm:row-span-2" : ""
-                }`}
+        <div className="mt-14 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {activeCategory.images.map((image, index) => (
+            <figure
+              key={image.key}
+              className={`overflow-hidden bg-secondary/30 ${
+                index % 5 === 0 ? "sm:col-span-2 sm:row-span-2" : ""
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => setLightboxIndex(index)}
+                className="block h-full w-full cursor-zoom-in text-left"
+                aria-label={`View ${image.alt} full size`}
               >
-                <button
-                  type="button"
-                  onClick={() => setLightboxIndex(index)}
-                  className="block h-full w-full cursor-zoom-in text-left"
-                  aria-label={`View ${alt} full size`}
-                >
-                  <img
-                    src={src}
-                    alt={alt}
-                    loading="lazy"
-                    className={`h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02] ${
-                      index % 5 === 0 ? "aspect-4/3 sm:aspect-auto sm:min-h-[520px]" : "aspect-4/3"
-                    }`}
-                  />
-                </button>
-              </figure>
-            );
-          })}
+                <img
+                  src={image.src}
+                  alt={image.alt}
+                  loading="lazy"
+                  className={`h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02] ${
+                    index % 5 === 0 ? "aspect-4/3 sm:aspect-auto sm:min-h-[520px]" : "aspect-4/3"
+                  }`}
+                />
+              </button>
+            </figure>
+          ))}
         </div>
       </div>
 
-      {isOpen && currentSrc && (
+      {isOpen && currentImage && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/92 p-4 md:p-8"
           onClick={() => setLightboxIndex(null)}
           role="dialog"
           aria-modal="true"
-          aria-label={currentAlt}
+          aria-label={currentImage.alt}
         >
           <button
             type="button"
@@ -163,9 +232,9 @@ export function PortfolioGallery() {
             onClick={(event) => event.stopPropagation()}
           >
             <img
-              key={currentSrc}
-              src={currentSrc}
-              alt={currentAlt}
+              key={currentImage.key}
+              src={currentImage.src}
+              alt={currentImage.alt}
               className="max-h-[82vh] w-full object-contain"
             />
 

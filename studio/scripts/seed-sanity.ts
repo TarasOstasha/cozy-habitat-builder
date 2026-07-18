@@ -1,8 +1,8 @@
 /**
- * Seed singleton documents with current homepage copy.
+ * Seed singleton documents with current homepage + portfolio copy.
  * Run from studio/: npm run seed
  */
-import {createReadStream} from 'node:fs'
+import {createReadStream, readdirSync} from 'node:fs'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
 import {getCliClient} from 'sanity/cli'
@@ -19,6 +19,17 @@ async function uploadImage(relativePath: string, filename: string) {
     _type: 'image' as const,
     asset: {_type: 'reference' as const, _ref: asset._id},
   }
+}
+
+function listImageFiles(relativeFolder: string) {
+  const absoluteFolder = path.join(repoRoot, relativeFolder)
+  return readdirSync(absoluteFolder)
+    .filter((name) => /\.(webp|jpe?g|png)$/i.test(name))
+    .sort((a, b) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'}))
+    .map((name) => ({
+      relativePath: path.join(relativeFolder, name).replace(/\\/g, '/'),
+      filename: name,
+    }))
 }
 
 const siteSettings = {
@@ -39,9 +50,11 @@ const siteSettings = {
   email: 'semtaccd@gmail.com',
   addressLine1: '257 Ely Ave',
   addressLine2: 'Norwalk, CT 06854',
+  siteUrl: 'https://www.semtaccd.shop',
   seoTitle: 'SEMTA - Custom Cabinetry & Design · Norwalk, CT',
   seoDescription:
     'SEMTA designs, builds and installs the highest-quality custom cabinetry for residential and commercial spaces. Locally owned and operated in Norwalk, CT.',
+  ogSiteName: 'SEMTA',
 }
 
 const partners = [
@@ -51,6 +64,45 @@ const partners = [
   {name: 'Harbor Architects', order: 4},
   {name: 'New Canaan Homes', order: 5},
   {name: 'Sound View Studio', order: 6},
+]
+
+const portfolioCategoryDefs = [
+  {
+    key: 'kitchen-ashton',
+    title: 'Kitchen · Ashton',
+    slug: 'kitchen-ashton',
+    folder: 'src/assets/kitchen/Ashton',
+  },
+  {
+    key: 'kitchen-anchorage',
+    title: 'Kitchen · Anchorage Ct',
+    slug: 'kitchen-anchorage',
+    folder: 'src/assets/kitchen/Anchorage_Ct',
+  },
+  {
+    key: 'bathrooms',
+    title: 'Bathrooms',
+    slug: 'bathrooms',
+    folder: 'src/assets/Bathrooms',
+  },
+  {
+    key: 'bar',
+    title: 'Bar',
+    slug: 'bar',
+    folder: 'src/assets/Bar',
+  },
+  {
+    key: 'mudroom',
+    title: 'Mudroom',
+    slug: 'mudroom',
+    folder: 'src/assets/Mudroom',
+  },
+  {
+    key: 'others',
+    title: 'Other Projects',
+    slug: 'others',
+    folder: 'src/assets/Others',
+  },
 ]
 
 async function seed() {
@@ -68,6 +120,29 @@ async function seed() {
     'spa-bath.webp',
   )
 
+  console.log('Uploading portfolio gallery images...')
+  const portfolioCategories = []
+  for (const category of portfolioCategoryDefs) {
+    const files = listImageFiles(category.folder)
+    console.log(`  ${category.title}: ${files.length} images`)
+    const images = []
+    for (const [index, file] of files.entries()) {
+      const uploaded = await uploadImage(file.relativePath, file.filename)
+      images.push({
+        ...uploaded,
+        _key: `${category.key}-${index + 1}`,
+        alt: `${category.title} project ${index + 1}`,
+      })
+    }
+    if (images.length === 0) continue
+    portfolioCategories.push({
+      _key: category.key,
+      title: category.title,
+      slug: {_type: 'slug', current: category.slug},
+      images,
+    })
+  }
+
   const homePage = {
     _id: 'homePage',
     _type: 'homePage',
@@ -78,6 +153,9 @@ async function seed() {
       ogTitle: 'SEMTA - Custom Cabinetry & Design',
       ogDescription:
         'Locally owned custom cabinetry studio in Norwalk, CT. Initial Consultation · Custom Design · Build · Delivery & Installation.',
+      twitterCard: 'summary_large_image',
+      noIndex: false,
+      noFollow: false,
     },
     hero: {
       eyebrow: 'Custom Cabinetry · Residential & Commercial',
@@ -196,9 +274,32 @@ async function seed() {
     },
   }
 
+  const portfolioPage = {
+    _id: 'portfolioPage',
+    _type: 'portfolioPage',
+    seo: {
+      title: 'Portfolio · SEMTA Custom Cabinetry & Design',
+      description:
+        'Browse SEMTA custom cabinetry projects — kitchens, bathrooms, bars, mudrooms and more. Built in Norwalk, CT.',
+      ogTitle: 'SEMTA Portfolio',
+      ogDescription:
+        'Browse kitchens, baths, bars and more — each project crafted in our Norwalk studio.',
+      twitterCard: 'summary_large_image',
+      noIndex: false,
+      noFollow: false,
+    },
+    eyebrow: 'Portfolio',
+    title: 'Selected work by room.',
+    body: 'Browse kitchens, baths, bars and more — each project crafted in our Norwalk studio and installed by our own team.',
+    ctaLabel: 'Begin a Project',
+    ctaHref: '/#contact',
+    categories: portfolioCategories,
+  }
+
   const transaction = client.transaction()
   transaction.createOrReplace(siteSettings)
   transaction.createOrReplace(homePage)
+  transaction.createOrReplace(portfolioPage)
 
   for (const [index, partner] of partners.entries()) {
     transaction.createOrReplace({
@@ -211,7 +312,9 @@ async function seed() {
   }
 
   await transaction.commit()
-  console.log('Seeded siteSettings, homePage (with Our Work projects), and partners.')
+  console.log(
+    'Seeded siteSettings, homePage, portfolioPage (with gallery categories), and partners.',
+  )
 }
 
 seed().catch((error) => {
