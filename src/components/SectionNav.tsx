@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { landingSections } from "@/lib/landing-sections";
+import type { LandingSection } from "@/lib/landing-sections";
+import { landingSections as defaultLandingSections } from "@/lib/landing-sections";
 import { cn } from "@/lib/utils";
 
 function usePrefersReducedMotion() {
@@ -22,16 +23,24 @@ function scrollToSection(id: string, smooth: boolean) {
   target.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
 }
 
-export function SectionNav() {
-  const [activeId, setActiveId] = useState(landingSections[0]?.id ?? "");
+type SectionNavProps = {
+  sections?: LandingSection[];
+};
+
+export function SectionNav({ sections = defaultLandingSections }: SectionNavProps) {
+  const [activeId, setActiveId] = useState(sections[0]?.id ?? "");
   const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    const sections = landingSections
+    setActiveId(sections[0]?.id ?? "");
+  }, [sections]);
+
+  useEffect(() => {
+    const observed = sections
       .map((section) => document.getElementById(section.id))
       .filter((element): element is HTMLElement => element !== null);
 
-    if (sections.length === 0) return;
+    if (observed.length === 0) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -46,9 +55,11 @@ export function SectionNav() {
       { rootMargin: "-20% 0px -55% 0px", threshold: [0.1, 0.25, 0.5] },
     );
 
-    sections.forEach((section) => observer.observe(section));
+    observed.forEach((section) => observer.observe(section));
     return () => observer.disconnect();
-  }, []);
+  }, [sections]);
+
+  if (sections.length === 0) return null;
 
   const handleClick = (id: string) => {
     setActiveId(id);
@@ -63,7 +74,7 @@ export function SectionNav() {
         className="fixed right-6 top-1/2 z-30 hidden -translate-y-1/2 lg:block"
       >
         <ol className="flex flex-col gap-3">
-          {landingSections.map((section) => {
+          {sections.map((section) => {
             const isActive = section.id === activeId;
             return (
               <li key={section.id}>
@@ -106,7 +117,7 @@ export function SectionNav() {
         className="fixed bottom-5 left-1/2 z-30 -translate-x-1/2 lg:hidden"
       >
         <div className="flex items-center gap-2 rounded-full border border-border/70 bg-background/90 px-3 py-2 shadow-sm backdrop-blur-sm">
-          {landingSections.map((section) => {
+          {sections.map((section) => {
             const isActive = section.id === activeId;
             return (
               <button

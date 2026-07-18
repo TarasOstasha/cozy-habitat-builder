@@ -2,8 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ContactForm } from "@/components/ContactForm";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { fetchSiteSettings } from "@/lib/sanity/fetch";
 
 export const Route = createFileRoute("/designers")({
+  loader: () => fetchSiteSettings(),
   head: () => ({
     meta: [
       { title: "For Designers · SEMTA Custom Cabinetry & Design" },
@@ -18,9 +20,11 @@ export const Route = createFileRoute("/designers")({
 });
 
 function DesignersPage() {
+  const settings = Route.useLoaderData();
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader />
+      <SiteHeader locationLabel={settings.locationLabel} />
 
       <main className="px-6 py-20 md:px-14 md:py-28">
         <div className="mx-auto grid max-w-[1100px] grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-20">
@@ -50,7 +54,11 @@ function DesignersPage() {
         </div>
       </main>
 
-      <SiteFooter />
+      <SiteFooter
+        footerLogo={settings.footerLogo}
+        footerTagline={settings.footerTagline}
+        footerNavLinks={settings.footerNavLinks}
+      />
     </div>
   );
 }

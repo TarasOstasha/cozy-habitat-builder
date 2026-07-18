@@ -1,0 +1,124 @@
+export type SanityImage = {
+  asset?: { _ref?: string; _id?: string; url?: string } | null;
+  alt?: string | null;
+};
+
+export type FooterNavLink = {
+  _key: string;
+  label?: string | null;
+  href?: string | null;
+};
+
+export type SiteSettings = {
+  brandName?: string | null;
+  locationLabel?: string | null;
+  footerLogo?: SanityImage | null;
+  footerTagline?: string | null;
+  footerNavLinks?: FooterNavLink[] | null;
+  phoneDisplay?: string | null;
+  phoneHref?: string | null;
+  email?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+};
+
+export type SectionIntro = {
+  enabled?: boolean | null;
+  eyebrow?: string | null;
+  title?: string | null;
+  body?: string | null;
+};
+
+export type ServiceItem = {
+  _key: string;
+  number?: string | null;
+  title?: string | null;
+  body?: string | null;
+};
+
+export type WorkPreviewProject = {
+  _key: string;
+  category?: string | null;
+  title?: string | null;
+  description?: string | null;
+  image?: SanityImage | null;
+};
+
+export type HomePage = {
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+    ogTitle?: string | null;
+    ogDescription?: string | null;
+  } | null;
+  hero?: {
+    enabled?: boolean | null;
+    eyebrow?: string | null;
+    headline?: string | null;
+    headlineAccent?: string | null;
+    backgroundImage?: SanityImage | null;
+    callLabel?: string | null;
+    bookLabel?: string | null;
+    viewWorkLabel?: string | null;
+    portfolioLinkLabel?: string | null;
+  } | null;
+  specialization?: SectionIntro | null;
+  workPreview?:
+    | (SectionIntro & {
+        viewPortfolioLabel?: string | null;
+        browseAllLabel?: string | null;
+        projects?: WorkPreviewProject[] | null;
+      })
+    | null;
+  portfolio?:
+    | (SectionIntro & {
+        viewFullLabel?: string | null;
+        selectedWork?: (SectionIntro & { image?: SanityImage | null }) | null;
+        studio?:
+          | (SectionIntro & {
+              ctaLabel?: string | null;
+              image?: SanityImage | null;
+            })
+          | null;
+      })
+    | null;
+  services?: {
+    enabled?: boolean | null;
+    eyebrow?: string | null;
+    title?: string | null;
+    items?: ServiceItem[] | null;
+  } | null;
+  craftsmanship?: {
+    enabled?: boolean | null;
+    eyebrow?: string | null;
+    quote?: string | null;
+    attribution?: string | null;
+    image?: SanityImage | null;
+  } | null;
+  partners?: SectionIntro | null;
+  contact?:
+    | (SectionIntro & {
+        studioLabel?: string | null;
+        phoneLabel?: string | null;
+        emailLabel?: string | null;
+        formEyebrow?: string | null;
+        formTitle?: string | null;
+      })
+    | null;
+};
+
+export type PartnerDoc = {
+  _id: string;
+  name?: string | null;
+  url?: string | null;
+  enabled?: boolean | null;
+  logo?: SanityImage | null;
+};
+
+export type HomePagePayload = {
+  settings: SiteSettings | null;
+  home: HomePage | null;
+  partnersList: PartnerDoc[];
+};

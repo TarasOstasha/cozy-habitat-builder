@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { CarouselApi } from "@/components/ui/carousel";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
-import { partners } from "@/lib/partners";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { defaultHome, defaultPartners, pick } from "@/lib/sanity/defaults";
+import { sanityImageUrl } from "@/lib/sanity/image";
+import type { PartnerDoc } from "@/lib/sanity/types";
 import { cn } from "@/lib/utils";
 
 function usePrefersReducedMotion() {
@@ -22,11 +20,24 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-export function PartnersSection() {
+type PartnersSectionProps = {
+  eyebrow?: string | null;
+  title?: string | null;
+  body?: string | null;
+  partners?: PartnerDoc[];
+};
+
+export function PartnersSection({
+  eyebrow,
+  title,
+  body,
+  partners = defaultPartners,
+}: PartnersSectionProps) {
   const [api, setApi] = useState<CarouselApi>();
   const [isHovered, setIsHovered] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const defaults = defaultHome.partners!;
 
   useEffect(() => {
     if (!api || prefersReducedMotion || isHovered) {
@@ -57,13 +68,10 @@ export function PartnersSection() {
     >
       <div className="mx-auto max-w-[1300px]">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="eyebrow">Our Partners</span>
-          <h2 className="mt-6 font-display text-4xl md:text-5xl">
-            Trusted by designers and builders.
-          </h2>
+          <span className="eyebrow">{pick(eyebrow, defaults.eyebrow!)}</span>
+          <h2 className="mt-6 font-display text-4xl md:text-5xl">{pick(title, defaults.title!)}</h2>
           <p className="mt-8 text-base leading-relaxed text-muted-foreground md:text-lg">
-            We collaborate with interior designers, architects and builders across Connecticut to
-            bring precision cabinetry to every project.
+            {pick(body, defaults.body!)}
           </p>
         </div>
 
@@ -81,35 +89,38 @@ export function PartnersSection() {
             aria-label="Partner logos"
           >
             <CarouselContent className="-ml-4">
-              {partners.map((partner) => (
-                <CarouselItem
-                  key={partner.id}
-                  className="basis-1/2 pl-4 sm:basis-1/3 md:basis-1/4 lg:basis-1/6"
-                >
-                  <div
-                    className={cn(
-                      "flex h-24 items-center justify-center rounded-sm border border-border/60 bg-background px-4",
-                      "transition-colors hover:border-border",
-                    )}
+              {partners.map((partner) => {
+                const logoUrl = sanityImageUrl(partner.logo, 320);
+                return (
+                  <CarouselItem
+                    key={partner._id}
+                    className="basis-1/2 pl-4 sm:basis-1/3 md:basis-1/4 lg:basis-1/6"
                   >
-                    {partner.logo ? (
-                      <img
-                        src={partner.logo}
-                        alt={`${partner.name} logo`}
-                        loading="lazy"
-                        className="max-h-10 max-w-[8rem] object-contain opacity-80 grayscale transition-all hover:opacity-100 hover:grayscale-0"
-                      />
-                    ) : (
-                      <span
-                        className="eyebrow text-center text-[0.62rem] leading-snug text-muted-foreground"
-                        aria-label={`${partner.name} — placeholder logo`}
-                      >
-                        {partner.name}
-                      </span>
-                    )}
-                  </div>
-                </CarouselItem>
-              ))}
+                    <div
+                      className={cn(
+                        "flex h-24 items-center justify-center rounded-sm border border-border/60 bg-background px-4",
+                        "transition-colors hover:border-border",
+                      )}
+                    >
+                      {logoUrl ? (
+                        <img
+                          src={logoUrl}
+                          alt={partner.logo?.alt || `${partner.name} logo`}
+                          loading="lazy"
+                          className="max-h-10 max-w-[8rem] object-contain opacity-80 grayscale transition-all hover:opacity-100 hover:grayscale-0"
+                        />
+                      ) : (
+                        <span
+                          className="eyebrow text-center text-[0.62rem] leading-snug text-muted-foreground"
+                          aria-label={`${partner.name} — placeholder logo`}
+                        >
+                          {partner.name}
+                        </span>
+                      )}
+                    </div>
+                  </CarouselItem>
+                );
+              })}
             </CarouselContent>
           </Carousel>
         </div>

@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { Brandmark } from "@/components/Brandmark";
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { defaultSettings, pick } from "@/lib/sanity/defaults";
 
 const navItems = [
   { label: "Home", to: "/" as const },
@@ -10,12 +11,27 @@ const navItems = [
   { label: "For Designers", to: "/designers" as const },
 ];
 
-export function SiteHeader({ overHero = false }: { overHero?: boolean }) {
+type SiteHeaderProps = {
+  overHero?: boolean;
+  locationLabel?: string | null;
+  phoneDisplay?: string | null;
+  phoneHref?: string | null;
+};
+
+export function SiteHeader({
+  overHero = false,
+  locationLabel,
+  phoneDisplay,
+  phoneHref,
+}: SiteHeaderProps) {
   const [open, setOpen] = useState(false);
   const navClass = overHero ? "text-white/90" : "text-foreground/90";
   const locationClass = overHero ? "text-white/90" : "text-muted-foreground";
   const triggerClass = overHero ? "text-white" : "text-foreground";
   const contactHref = overHero ? "#contact" : "/#contact";
+  const location = pick(locationLabel, defaultSettings.locationLabel!);
+  const phone = pick(phoneDisplay, defaultSettings.phoneDisplay!);
+  const tel = phoneHref || `tel:${defaultSettings.phoneHref}`;
 
   return (
     <header
@@ -29,7 +45,7 @@ export function SiteHeader({ overHero = false }: { overHero?: boolean }) {
         <span
           className={`eyebrow hidden lg:inline lg:tracking-[0.18em] xl:tracking-brand ${locationClass}`}
         >
-          Norwalk · Connecticut
+          {location}
         </span>
         <Brandmark
           invert={overHero}
@@ -65,15 +81,14 @@ export function SiteHeader({ overHero = false }: { overHero?: boolean }) {
             <SheetTrigger
               aria-label="Open menu"
               className={`inline-flex h-10 w-10 items-center justify-center transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:ring-offset-2 ${
-                overHero ? "focus-visible:ring-offset-black/30" : "focus-visible:ring-offset-background"
+                overHero
+                  ? "focus-visible:ring-offset-black/30"
+                  : "focus-visible:ring-offset-background"
               } ${triggerClass}`}
             >
               <Menu className="h-6 w-6" />
             </SheetTrigger>
-            <SheetContent
-              side="right"
-              className="flex w-4/5 max-w-xs flex-col gap-0 sm:max-w-sm"
-            >
+            <SheetContent side="right" className="flex w-4/5 max-w-xs flex-col gap-0 sm:max-w-sm">
               <div className="mt-4 flex flex-col items-start">
                 <Brandmark href="/" />
               </div>
@@ -100,12 +115,9 @@ export function SiteHeader({ overHero = false }: { overHero?: boolean }) {
                 </SheetClose>
               </nav>
               <div className="mt-auto border-t border-border/60 pt-8">
-                <span className="eyebrow text-muted-foreground">Norwalk · Connecticut</span>
-                <a
-                  href="tel:+19177050712"
-                  className="mt-3 block font-display text-2xl link-underline"
-                >
-                  +1 (917) 705 0712
+                <span className="eyebrow text-muted-foreground">{location}</span>
+                <a href={tel} className="mt-3 block font-display text-2xl link-underline">
+                  {phone}
                 </a>
               </div>
             </SheetContent>
