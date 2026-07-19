@@ -27,7 +27,7 @@ export function WorkPreview({
   const cmsProjects =
     projects
       ?.map((project) => {
-        const imageUrl = sanityImageUrl(project.image, 1200);
+        const imageUrl = sanityImageUrl(project.image, 900);
         if (!project.title || !imageUrl) return null;
         return {
           key: project._key,

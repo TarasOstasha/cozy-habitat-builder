@@ -3,12 +3,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Phone, CalendarDays, ArrowDown } from "lucide-react";
 import { ContactForm } from "@/components/ContactForm";
 import { CustomBlocks, customNavSections } from "@/components/CustomBlocks";
+import { DeferredWorkCarousel } from "@/components/DeferredWorkCarousel";
 import { PartnersSection } from "@/components/PartnersSection";
 import { ReviewsSection } from "@/components/ReviewsSection";
 import { SectionNav } from "@/components/SectionNav";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { WorkCarousel } from "@/components/WorkCarousel";
 import { WorkPreview } from "@/components/WorkPreview";
 import slide1 from "@/assets/semta-slide1.jpg";
 import slide2 from "@/assets/semta-slide2.jpg";
@@ -16,7 +16,13 @@ import slide4 from "@/assets/semta-slide4.jpg";
 import craftsmanshipFallback from "@/assets/craftsmanship.jpg";
 import { defaultHome, defaultSettings, isSectionEnabled, pick } from "@/lib/sanity/defaults";
 import { fetchHomePage } from "@/lib/sanity/fetch";
-import { sanityImageUrl } from "@/lib/sanity/image";
+import {
+  HERO_IMAGE_SIZES,
+  HERO_SRCSET_WIDTHS,
+  sanityHeroImageUrl,
+  sanityImageSrcSet,
+  sanityImageUrl,
+} from "@/lib/sanity/image";
 import {
   AFTER_SECTION_PLACEMENT,
   resolveSectionOrder,
@@ -28,8 +34,8 @@ import { landingSections } from "@/lib/landing-sections";
 
 export const Route = createFileRoute("/")({
   loader: () => fetchHomePage(),
-  head: ({ loaderData }) =>
-    buildSeoHead({
+  head: ({ loaderData }) => {
+    const seo = buildSeoHead({
       seo: loaderData?.home?.seo,
       settings: loaderData?.settings,
       fallbacks: {
@@ -37,7 +43,31 @@ export const Route = createFileRoute("/")({
         description: defaultHome.seo?.description || undefined,
         twitterCard: defaultHome.seo?.twitterCard || undefined,
       },
-    }),
+    });
+
+    const heroImage = loaderData?.home?.hero?.backgroundImage;
+    const heroHref = sanityHeroImageUrl(heroImage);
+    const heroSrcSet = sanityImageSrcSet(heroImage, HERO_SRCSET_WIDTHS);
+
+    return {
+      ...seo,
+      links: [
+        ...(seo.links ?? []),
+        ...(heroHref && heroSrcSet
+          ? [
+              {
+                rel: "preload",
+                as: "image" as const,
+                href: heroHref,
+                imageSrcSet: heroSrcSet,
+                imageSizes: HERO_IMAGE_SIZES,
+                fetchPriority: "high" as const,
+              },
+            ]
+          : []),
+      ],
+    };
+  },
   component: Index,
 });
 
@@ -74,10 +104,11 @@ function Index() {
   const showReviews = isSectionEnabled(reviews.enabled);
   const showContact = isSectionEnabled(contact.enabled);
 
-  const heroImage = sanityImageUrl(hero.backgroundImage, 2400) || slide1;
-  const selectedWorkImage = sanityImageUrl(portfolio.selectedWork?.image, 1600) || slide2;
-  const studioImage = sanityImageUrl(portfolio.studio?.image, 1600) || slide4;
-  const craftImage = sanityImageUrl(craftsmanship.image, 2000) || craftsmanshipFallback;
+  const heroImage = sanityHeroImageUrl(hero.backgroundImage) || slide1;
+  const heroSrcSet = sanityImageSrcSet(hero.backgroundImage, HERO_SRCSET_WIDTHS) || undefined;
+  const selectedWorkImage = sanityImageUrl(portfolio.selectedWork?.image, 1200) || slide2;
+  const studioImage = sanityImageUrl(portfolio.studio?.image, 1200) || slide4;
+  const craftImage = sanityImageUrl(craftsmanship.image, 1600) || craftsmanshipFallback;
 
   const phoneHrefDigits = pick(s.phoneHref, defaultSettings.phoneHref!);
   const phoneHref = `tel:${phoneHrefDigits}`;
@@ -148,7 +179,11 @@ function Index() {
       >
         <img
           src={heroImage}
+          srcSet={heroSrcSet}
+          sizes={heroSrcSet ? HERO_IMAGE_SIZES : undefined}
           alt={hero.backgroundImage?.alt || "SEMTA custom kitchen cabinetry"}
+          fetchPriority="high"
+          decoding="async"
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="overlay-dark absolute inset-0" />
@@ -244,7 +279,7 @@ function Index() {
               </p>
             </div>
             <div className="mt-16">
-              <WorkCarousel />
+              <DeferredWorkCarousel />
             </div>
             <div className="mt-12 text-center">
               <Link to="/portfolio" className="eyebrow link-underline inline-block">
