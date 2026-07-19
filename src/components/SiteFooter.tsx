@@ -3,11 +3,18 @@ import { defaultFooterNavLinks, defaultSettings, pick } from "@/lib/sanity/defau
 import type { FooterNavLink } from "@/lib/sanity/types";
 
 type SiteFooterProps = {
+  brandName?: string | null;
+  brandTagline?: string | null;
   footerTagline?: string | null;
   footerNavLinks?: FooterNavLink[] | null;
 };
 
-export function SiteFooter({ footerTagline, footerNavLinks }: SiteFooterProps) {
+export function SiteFooter({
+  brandName,
+  brandTagline,
+  footerTagline,
+  footerNavLinks,
+}: SiteFooterProps) {
   const tagline = pick(footerTagline, defaultSettings.footerTagline!);
   const links =
     footerNavLinks && footerNavLinks.length > 0 ? footerNavLinks : defaultFooterNavLinks;
@@ -16,7 +23,7 @@ export function SiteFooter({ footerTagline, footerNavLinks }: SiteFooterProps) {
     <footer className="border-t border-border/60 bg-secondary/40">
       <div className="mx-auto max-w-[1400px] px-6 py-16 md:px-14">
         <div className="flex flex-col items-center gap-8">
-          <Brandmark href="/" />
+          <Brandmark href="/" brandName={brandName} brandTagline={brandTagline} />
           <nav className="flex flex-wrap justify-center gap-x-10 gap-y-4">
             {links.map((link) => {
               const href = link.href || "/";

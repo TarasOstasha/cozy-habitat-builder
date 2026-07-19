@@ -11,5 +11,6 @@ export const landingSections: LandingSection[] = [
   { id: "services", label: "Services" },
   { id: "craftsmanship", label: "Craft" },
   { id: "partners", label: "Partners" },
+  { id: "reviews", label: "Reviews" },
   { id: "contact", label: "Contact" },
 ];

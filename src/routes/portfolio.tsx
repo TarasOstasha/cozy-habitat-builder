@@ -33,7 +33,14 @@ function PortfolioPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader locationLabel={s.locationLabel} />
+      <SiteHeader
+        brandName={s.brandName}
+        brandTagline={s.brandTagline}
+        locationLabel={s.locationLabel}
+        phoneDisplay={s.phoneDisplay}
+        phoneHref={s.phoneHref}
+        headerNavLinks={s.headerNavLinks}
+      />
 
       <main className="px-6 py-20 md:px-14 md:py-28">
         <div className="mx-auto max-w-[1400px]">
@@ -61,6 +68,8 @@ function PortfolioPage() {
       </main>
 
       <SiteFooter
+        brandName={s.brandName}
+        brandTagline={s.brandTagline}
         footerTagline={s.footerTagline}
         footerNavLinks={s.footerNavLinks}
       />

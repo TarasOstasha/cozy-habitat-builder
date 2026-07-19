@@ -1,13 +1,24 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sanityClient } from "./client";
 import {
+  defaultDesigners,
   defaultHome,
   defaultPartners,
   defaultPortfolio,
   defaultSettings,
 } from "./defaults";
-import { HOME_PAGE_QUERY, PORTFOLIO_PAGE_QUERY } from "./queries";
-import type { HomePagePayload, PortfolioPagePayload, SiteSettings } from "./types";
+import {
+  DESIGNERS_PAGE_QUERY,
+  HOME_PAGE_QUERY,
+  PORTFOLIO_PAGE_QUERY,
+  SITE_SETTINGS_QUERY,
+} from "./queries";
+import type {
+  DesignersPagePayload,
+  HomePagePayload,
+  PortfolioPagePayload,
+  SiteSettings,
+} from "./types";
 
 export const fetchHomePage = createServerFn({ method: "GET" }).handler(
   async (): Promise<HomePagePayload> => {
@@ -47,35 +58,28 @@ export const fetchPortfolioPage = createServerFn({ method: "GET" }).handler(
   },
 );
 
+export const fetchDesignersPage = createServerFn({ method: "GET" }).handler(
+  async (): Promise<DesignersPagePayload> => {
+    try {
+      const data = await sanityClient.fetch<DesignersPagePayload>(DESIGNERS_PAGE_QUERY);
+      return {
+        settings: data.settings ?? defaultSettings,
+        designers: data.designers ?? defaultDesigners,
+      };
+    } catch (error) {
+      console.error("Failed to fetch Sanity designers page content", error);
+      return {
+        settings: defaultSettings,
+        designers: defaultDesigners,
+      };
+    }
+  },
+);
+
 export const fetchSiteSettings = createServerFn({ method: "GET" }).handler(
   async (): Promise<SiteSettings> => {
     try {
-      const settings = await sanityClient.fetch<SiteSettings | null>(/* groq */ `
-        *[_type == "siteSettings"][0]{
-          brandName,
-          locationLabel,
-          footerLogo{
-            asset->{ _id, url },
-            alt
-          },
-          footerTagline,
-          footerNavLinks[]{ _key, label, href },
-          phoneDisplay,
-          phoneHref,
-          email,
-          addressLine1,
-          addressLine2,
-          siteUrl,
-          seoTitle,
-          seoDescription,
-          seoImage{
-            asset->{ _id, url },
-            alt
-          },
-          ogSiteName,
-          twitterHandle
-        }
-      `);
+      const settings = await sanityClient.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY);
       return settings ?? defaultSettings;
     } catch (error) {
       console.error("Failed to fetch Sanity site settings", error);

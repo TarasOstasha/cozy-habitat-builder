@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Phone, CalendarDays, ArrowDown } from "lucide-react";
 import { ContactForm } from "@/components/ContactForm";
 import { PartnersSection } from "@/components/PartnersSection";
+import { ReviewsSection } from "@/components/ReviewsSection";
 import { SectionNav } from "@/components/SectionNav";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -101,9 +102,12 @@ function Index() {
     <div className="min-h-screen bg-background pb-20 text-foreground lg:pb-0">
       <SiteHeader
         overHero={showHero}
+        brandName={s.brandName}
+        brandTagline={s.brandTagline}
         locationLabel={s.locationLabel}
         phoneDisplay={phoneDisplay}
         phoneHref={phoneHref}
+        headerNavLinks={s.headerNavLinks}
       />
       <SectionNav sections={navSections} />
 
@@ -349,6 +353,8 @@ function Index() {
         />
       ) : null}
 
+      <ReviewsSection />
+
       {showContact ? (
         <section
           id="contact"
@@ -403,7 +409,12 @@ function Index() {
                   {pick(contact.formTitle, defaultHome.contact!.formTitle!)}
                 </h3>
                 <div className="mt-8">
-                  <ContactForm intent="contact" />
+                  <ContactForm
+                    intent="contact"
+                    email={email}
+                    messagePlaceholder={contact.messagePlaceholder}
+                    submitLabel={contact.submitLabel}
+                  />
                 </div>
               </div>
             </div>
@@ -412,6 +423,8 @@ function Index() {
       ) : null}
 
       <SiteFooter
+        brandName={s.brandName}
+        brandTagline={s.brandTagline}
         footerTagline={s.footerTagline}
         footerNavLinks={s.footerNavLinks}
       />

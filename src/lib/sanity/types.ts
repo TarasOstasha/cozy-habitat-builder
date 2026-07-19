@@ -18,6 +18,8 @@ export type FooterNavLink = {
   href?: string | null;
 };
 
+export type HeaderNavLink = FooterNavLink;
+
 export type PageSeo = {
   title?: string | null;
   description?: string | null;
@@ -33,7 +35,9 @@ export type PageSeo = {
 
 export type SiteSettings = {
   brandName?: string | null;
+  brandTagline?: string | null;
   locationLabel?: string | null;
+  headerNavLinks?: HeaderNavLink[] | null;
   footerLogo?: SanityImage | null;
   footerTagline?: string | null;
   footerNavLinks?: FooterNavLink[] | null;
@@ -48,6 +52,7 @@ export type SiteSettings = {
   seoImage?: SanityImage | null;
   ogSiteName?: string | null;
   twitterHandle?: string | null;
+  googleAnalyticsSnippet?: string | null;
 };
 
 export type SectionIntro = {
@@ -126,6 +131,8 @@ export type HomePage = {
         emailLabel?: string | null;
         formEyebrow?: string | null;
         formTitle?: string | null;
+        messagePlaceholder?: string | null;
+        submitLabel?: string | null;
       })
     | null;
 };
@@ -162,6 +169,28 @@ export type PortfolioPage = {
 export type PortfolioPagePayload = {
   settings: SiteSettings | null;
   portfolio: PortfolioPage | null;
+};
+
+export type DesignersHighlight = {
+  _key: string;
+  text?: string | null;
+};
+
+export type DesignersPage = {
+  seo?: PageSeo | null;
+  eyebrow?: string | null;
+  title?: string | null;
+  body?: string | null;
+  highlights?: DesignersHighlight[] | null;
+  formEyebrow?: string | null;
+  formTitle?: string | null;
+  messagePlaceholder?: string | null;
+  submitLabel?: string | null;
+};
+
+export type DesignersPagePayload = {
+  settings: SiteSettings | null;
+  designers: DesignersPage | null;
 };
 
 export type HomePagePayload = {

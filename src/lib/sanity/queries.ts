@@ -21,25 +21,32 @@ const seoProjection = /* groq */ `
   noFollow
 `;
 
+const settingsProjection = /* groq */ `
+  brandName,
+  brandTagline,
+  locationLabel,
+  headerNavLinks[]{ _key, label, href },
+  footerLogo{ ${imageProjection} },
+  footerTagline,
+  footerNavLinks[]{ _key, label, href },
+  phoneDisplay,
+  phoneHref,
+  email,
+  addressLine1,
+  addressLine2,
+  siteUrl,
+  seoTitle,
+  seoDescription,
+  seoImage{ ${imageProjection} },
+  ogSiteName,
+  twitterHandle,
+  googleAnalyticsSnippet
+`;
+
 export const HOME_PAGE_QUERY = defineQuery(/* groq */ `
   {
     "settings": *[_type == "siteSettings"][0]{
-      brandName,
-      locationLabel,
-      footerLogo{ ${imageProjection} },
-      footerTagline,
-      footerNavLinks[]{ _key, label, href },
-      phoneDisplay,
-      phoneHref,
-      email,
-      addressLine1,
-      addressLine2,
-      siteUrl,
-      seoTitle,
-      seoDescription,
-      seoImage{ ${imageProjection} },
-      ogSiteName,
-      twitterHandle
+      ${settingsProjection}
     },
     "home": *[_type == "homePage"][0]{
       seo{ ${seoProjection} },
@@ -118,22 +125,7 @@ export const HOME_PAGE_QUERY = defineQuery(/* groq */ `
 export const PORTFOLIO_PAGE_QUERY = defineQuery(/* groq */ `
   {
     "settings": *[_type == "siteSettings"][0]{
-      brandName,
-      locationLabel,
-      footerLogo{ ${imageProjection} },
-      footerTagline,
-      footerNavLinks[]{ _key, label, href },
-      phoneDisplay,
-      phoneHref,
-      email,
-      addressLine1,
-      addressLine2,
-      siteUrl,
-      seoTitle,
-      seoDescription,
-      seoImage{ ${imageProjection} },
-      ogSiteName,
-      twitterHandle
+      ${settingsProjection}
     },
     "portfolio": *[_type == "portfolioPage"][0]{
       seo{ ${seoProjection} },
@@ -152,5 +144,30 @@ export const PORTFOLIO_PAGE_QUERY = defineQuery(/* groq */ `
         images[]{ ${imageProjection} }
       }
     }
+  }
+`);
+
+export const DESIGNERS_PAGE_QUERY = defineQuery(/* groq */ `
+  {
+    "settings": *[_type == "siteSettings"][0]{
+      ${settingsProjection}
+    },
+    "designers": *[_type == "designersPage"][0]{
+      seo{ ${seoProjection} },
+      eyebrow,
+      title,
+      body,
+      highlights[]{ _key, text },
+      formEyebrow,
+      formTitle,
+      messagePlaceholder,
+      submitLabel
+    }
+  }
+`);
+
+export const SITE_SETTINGS_QUERY = defineQuery(/* groq */ `
+  *[_type == "siteSettings"][0]{
+    ${settingsProjection}
   }
 `);

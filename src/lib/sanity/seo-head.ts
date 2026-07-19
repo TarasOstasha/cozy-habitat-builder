@@ -12,6 +12,32 @@ type SeoHeadInput = {
   };
 };
 
+/** Accepts a bare Measurement ID or a pasted gtag.js snippet. */
+export function parseGoogleAnalyticsId(snippet?: string | null): string | null {
+  if (!snippet?.trim()) return null;
+  const trimmed = snippet.trim();
+  if (/^(G|GT|AW)-[A-Z0-9]+$/i.test(trimmed) || /^UA-\d+-\d+$/i.test(trimmed)) {
+    return trimmed.toUpperCase();
+  }
+  const match = trimmed.match(/\b(G-[A-Z0-9]+|GT-[A-Z0-9]+|AW-\d+|UA-\d+-\d+)\b/i);
+  return match?.[1]?.toUpperCase() ?? null;
+}
+
+function googleAnalyticsScripts(snippet?: string | null) {
+  const id = parseGoogleAnalyticsId(snippet);
+  if (!id) return undefined;
+
+  return [
+    {
+      async: true,
+      src: `https://www.googletagmanager.com/gtag/js?id=${id}`,
+    },
+    {
+      children: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${id}');`,
+    },
+  ];
+}
+
 export function buildSeoHead({ seo, settings, fallbacks }: SeoHeadInput) {
   const title = seo?.title || settings?.seoTitle || fallbacks?.title || "";
   const description =
@@ -61,6 +87,7 @@ export function buildSeoHead({ seo, settings, fallbacks }: SeoHeadInput) {
         : []),
     ],
     links: canonicalUrl ? [{ rel: "canonical", href: canonicalUrl }] : undefined,
+    scripts: googleAnalyticsScripts(settings?.googleAnalyticsSnippet),
   };
 }
 

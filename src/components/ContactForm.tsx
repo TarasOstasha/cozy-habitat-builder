@@ -2,14 +2,31 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { defaultSettings, pick } from "@/lib/sanity/defaults";
 
 type ContactFormProps = {
   intent?: "contact" | "designer";
+  email?: string | null;
+  messagePlaceholder?: string | null;
+  submitLabel?: string | null;
 };
 
-export function ContactForm({ intent = "contact" }: ContactFormProps) {
+export function ContactForm({
+  intent = "contact",
+  email,
+  messagePlaceholder,
+  submitLabel,
+}: ContactFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const isDesigner = intent === "designer";
+  const contactEmail = pick(email, defaultSettings.email!);
+  const placeholder = pick(
+    messagePlaceholder,
+    isDesigner
+      ? "Tell us about your project, timeline, and how we can support your design."
+      : "Tell us about your space and what you have in mind.",
+  );
+  const buttonLabel = pick(submitLabel, "Send Message");
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -17,7 +34,7 @@ export function ContactForm({ intent = "contact" }: ContactFormProps) {
     const data = new FormData(form);
 
     const name = String(data.get("name") ?? "");
-    const email = String(data.get("email") ?? "");
+    const senderEmail = String(data.get("email") ?? "");
     const phone = String(data.get("phone") ?? "");
     const company = String(data.get("company") ?? "");
     const message = String(data.get("message") ?? "");
@@ -26,7 +43,7 @@ export function ContactForm({ intent = "contact" }: ContactFormProps) {
 
     const body = [
       `Name: ${name}`,
-      `Email: ${email}`,
+      `Email: ${senderEmail}`,
       phone ? `Phone: ${phone}` : null,
       company ? `Company: ${company}` : null,
       "",
@@ -35,7 +52,7 @@ export function ContactForm({ intent = "contact" }: ContactFormProps) {
       .filter(Boolean)
       .join("\n");
 
-    window.location.href = `mailto:semtaccd@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     setSubmitted(true);
     form.reset();
   }
@@ -47,8 +64,8 @@ export function ContactForm({ intent = "contact" }: ContactFormProps) {
         <p className="mt-4 font-display text-2xl">Your message is ready to send.</p>
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
           Your email app should open with your message. If it did not, reach us directly at{" "}
-          <a href="mailto:semtaccd@gmail.com" className="link-underline">
-            semtaccd@gmail.com
+          <a href={`mailto:${contactEmail}`} className="link-underline">
+            {contactEmail}
           </a>
           .
         </p>
@@ -129,11 +146,7 @@ export function ContactForm({ intent = "contact" }: ContactFormProps) {
           name="message"
           required
           rows={5}
-          placeholder={
-            isDesigner
-              ? "Tell us about your project, timeline, and how we can support your design."
-              : "Tell us about your space and what you have in mind."
-          }
+          placeholder={placeholder}
           className="min-h-[140px] resize-none rounded-none border-border/80 bg-transparent"
         />
       </div>
@@ -142,7 +155,7 @@ export function ContactForm({ intent = "contact" }: ContactFormProps) {
         type="submit"
         className="inline-flex w-full items-center justify-center bg-[color:var(--color-gold)] px-7 py-3.5 text-sm font-medium tracking-[0.15em] uppercase text-black transition-colors hover:bg-[color:var(--color-gold-hover)] sm:w-auto"
       >
-        Send Message
+        {buttonLabel}
       </button>
     </form>
   );

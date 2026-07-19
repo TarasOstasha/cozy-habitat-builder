@@ -36,7 +36,13 @@ const siteSettings = {
   _id: 'siteSettings',
   _type: 'siteSettings',
   brandName: 'SEMTA',
+  brandTagline: 'Custom Cabinetry & Design',
   locationLabel: 'Norwalk · Connecticut',
+  headerNavLinks: [
+    {_key: 'portfolio', label: 'Portfolio', href: '/portfolio'},
+    {_key: 'designers', label: 'For Designers', href: '/designers'},
+    {_key: 'contact', label: 'Contact', href: '/#contact'},
+  ],
   footerTagline: 'SEMTA · Custom Cabinetry & Design',
   footerNavLinks: [
     {_key: 'home', label: 'Home', href: '/'},
@@ -271,6 +277,8 @@ async function seed() {
       emailLabel: 'Email',
       formEyebrow: 'Send a Message',
       formTitle: 'Tell us about your project.',
+      messagePlaceholder: 'Tell us about your space and what you have in mind.',
+      submitLabel: 'Send Message',
     },
   }
 
@@ -296,10 +304,40 @@ async function seed() {
     categories: portfolioCategories,
   }
 
+  const designersPage = {
+    _id: 'designersPage',
+    _type: 'designersPage',
+    seo: {
+      title: 'For Designers · SEMTA Custom Cabinetry & Design',
+      description:
+        'SEMTA partners with interior designers, architects and builders across Connecticut. Trade consultations, shop drawings, custom millwork and installation.',
+      ogTitle: 'For Designers · SEMTA',
+      ogDescription:
+        'Trade consultations, shop drawings, custom millwork and installation for designers across Connecticut.',
+      twitterCard: 'summary_large_image',
+      noIndex: false,
+      noFollow: false,
+    },
+    eyebrow: 'For Designers',
+    title: 'A fabrication partner for your vision.',
+    body: 'SEMTA works closely with interior designers, architects, and builders across Connecticut. We translate detailed drawings into precision-built cabinetry - with reliable timelines, open communication, and installation by our own team.',
+    highlights: [
+      {_key: 'h1', text: 'Trade consultations and shop drawings'},
+      {_key: 'h2', text: 'Custom millwork for residential and commercial'},
+      {_key: 'h3', text: 'Material samples and finish coordination'},
+    ],
+    formEyebrow: 'Get in Touch',
+    formTitle: 'Start a designer inquiry.',
+    messagePlaceholder:
+      'Tell us about your project, timeline, and how we can support your design.',
+    submitLabel: 'Send Message',
+  }
+
   const transaction = client.transaction()
   transaction.createOrReplace(siteSettings)
   transaction.createOrReplace(homePage)
   transaction.createOrReplace(portfolioPage)
+  transaction.createOrReplace(designersPage)
 
   for (const [index, partner] of partners.entries()) {
     transaction.createOrReplace({
@@ -313,7 +351,7 @@ async function seed() {
 
   await transaction.commit()
   console.log(
-    'Seeded siteSettings, homePage, portfolioPage (with gallery categories), and partners.',
+    'Seeded siteSettings, homePage, portfolioPage, designersPage (with gallery categories), and partners.',
   )
 }
 

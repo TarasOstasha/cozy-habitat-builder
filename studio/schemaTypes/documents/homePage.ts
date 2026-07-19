@@ -231,6 +231,16 @@ export const homePage = defineType({
         }),
         defineField({name: 'formEyebrow', title: 'Form eyebrow', type: 'string'}),
         defineField({name: 'formTitle', title: 'Form title', type: 'string'}),
+        defineField({
+          name: 'messagePlaceholder',
+          title: 'Message placeholder',
+          type: 'string',
+        }),
+        defineField({
+          name: 'submitLabel',
+          title: 'Submit button label',
+          type: 'string',
+        }),
       ],
     }),
   ],

@@ -1,37 +1,51 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { Brandmark } from "@/components/Brandmark";
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { defaultSettings, pick } from "@/lib/sanity/defaults";
-
-const navItems = [
-  { label: "Home", to: "/" as const },
-  { label: "Portfolio", to: "/portfolio" as const },
-  { label: "For Designers", to: "/designers" as const },
-];
+import { defaultHeaderNavLinks, defaultSettings, pick } from "@/lib/sanity/defaults";
+import type { HeaderNavLink } from "@/lib/sanity/types";
 
 type SiteHeaderProps = {
   overHero?: boolean;
+  brandName?: string | null;
+  brandTagline?: string | null;
   locationLabel?: string | null;
   phoneDisplay?: string | null;
   phoneHref?: string | null;
+  headerNavLinks?: HeaderNavLink[] | null;
 };
+
+function resolveNavHref(href: string, overHero: boolean) {
+  if (href === "/#contact" || href === "#contact") {
+    return overHero ? "#contact" : "/#contact";
+  }
+  return href;
+}
 
 export function SiteHeader({
   overHero = false,
+  brandName,
+  brandTagline,
   locationLabel,
   phoneDisplay,
   phoneHref,
+  headerNavLinks,
 }: SiteHeaderProps) {
   const [open, setOpen] = useState(false);
   const navClass = overHero ? "text-white/90" : "text-foreground/90";
   const locationClass = overHero ? "text-white/90" : "text-muted-foreground";
   const triggerClass = overHero ? "text-white" : "text-foreground";
-  const contactHref = overHero ? "#contact" : "/#contact";
   const location = pick(locationLabel, defaultSettings.locationLabel!);
   const phone = pick(phoneDisplay, defaultSettings.phoneDisplay!);
-  const tel = phoneHref || `tel:${defaultSettings.phoneHref}`;
+  const tel = phoneHref?.startsWith("tel:")
+    ? phoneHref
+    : `tel:${phoneHref || defaultSettings.phoneHref}`;
+  const links =
+    headerNavLinks && headerNavLinks.length > 0 ? headerNavLinks : defaultHeaderNavLinks;
+  const mobileLinks: HeaderNavLink[] = [
+    { _key: "home", label: "Home", href: "/" },
+    ...links.filter((link) => link.href !== "/"),
+  ];
 
   return (
     <header
@@ -50,32 +64,27 @@ export function SiteHeader({
         <Brandmark
           invert={overHero}
           href="/"
+          brandName={brandName}
+          brandTagline={brandTagline}
           className="items-start lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:items-center"
         />
 
-        {/* Desktop navigation */}
         <nav className="hidden lg:flex items-center gap-4 xl:gap-8">
-          <Link
-            to="/portfolio"
-            className={`eyebrow link-underline lg:tracking-[0.18em] xl:tracking-brand ${navClass}`}
-          >
-            Portfolio
-          </Link>
-          <Link
-            to="/designers"
-            className={`eyebrow link-underline lg:tracking-[0.18em] xl:tracking-brand ${navClass}`}
-          >
-            For Designers
-          </Link>
-          <a
-            href={contactHref}
-            className={`eyebrow link-underline lg:tracking-[0.18em] xl:tracking-brand ${navClass}`}
-          >
-            Contact
-          </a>
+          {links.map((link) => {
+            const href = resolveNavHref(link.href || "/", overHero);
+            const label = link.label || "Link";
+            return (
+              <a
+                key={link._key}
+                href={href}
+                className={`eyebrow link-underline lg:tracking-[0.18em] xl:tracking-brand ${navClass}`}
+              >
+                {label}
+              </a>
+            );
+          })}
         </nav>
 
-        {/* Mobile & tablet hamburger menu */}
         <div className="lg:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger
@@ -90,29 +99,23 @@ export function SiteHeader({
             </SheetTrigger>
             <SheetContent side="right" className="flex w-4/5 max-w-xs flex-col gap-0 sm:max-w-sm">
               <div className="mt-4 flex flex-col items-start">
-                <Brandmark href="/" />
+                <Brandmark href="/" brandName={brandName} brandTagline={brandTagline} />
               </div>
               <nav className="mt-12 flex flex-col gap-6" aria-label="Mobile">
-                {navItems.map((item) => (
-                  <SheetClose asChild key={item.to}>
-                    <Link
-                      to={item.to}
-                      className="eyebrow link-underline text-foreground"
-                      onClick={() => setOpen(false)}
-                    >
-                      {item.label}
-                    </Link>
-                  </SheetClose>
-                ))}
-                <SheetClose asChild>
-                  <a
-                    href={contactHref}
-                    className="eyebrow link-underline text-foreground"
-                    onClick={() => setOpen(false)}
-                  >
-                    Contact
-                  </a>
-                </SheetClose>
+                {mobileLinks.map((link) => {
+                  const href = resolveNavHref(link.href || "/", overHero);
+                  return (
+                    <SheetClose asChild key={link._key}>
+                      <a
+                        href={href}
+                        className="eyebrow link-underline text-foreground"
+                        onClick={() => setOpen(false)}
+                      >
+                        {link.label || "Link"}
+                      </a>
+                    </SheetClose>
+                  );
+                })}
               </nav>
               <div className="mt-auto border-t border-border/60 pt-8">
                 <span className="eyebrow text-muted-foreground">{location}</span>

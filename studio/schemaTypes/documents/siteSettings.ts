@@ -8,6 +8,7 @@ export const siteSettings = defineType({
   icon: CogIcon,
   groups: [
     {name: 'brand', title: 'Brand', default: true},
+    {name: 'navigation', title: 'Navigation'},
     {name: 'footer', title: 'Footer'},
     {name: 'contact', title: 'Contact'},
     {name: 'seo', title: 'SEO'},
@@ -21,11 +22,49 @@ export const siteSettings = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: 'brandTagline',
+      title: 'Brand tagline',
+      type: 'string',
+      description: 'Shown under the brand name in the header and footer, e.g. Custom Cabinetry & Design',
+      group: 'brand',
+    }),
+    defineField({
       name: 'locationLabel',
       title: 'Location label',
       type: 'string',
       description: 'Shown in the header, e.g. Norwalk · Connecticut',
       group: 'brand',
+    }),
+    defineField({
+      name: 'headerNavLinks',
+      title: 'Header navigation',
+      type: 'array',
+      group: 'navigation',
+      description: 'Desktop header links (mobile also includes Home automatically)',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'headerNavLink',
+          fields: [
+            defineField({
+              name: 'label',
+              title: 'Label',
+              type: 'string',
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: 'href',
+              title: 'Link',
+              type: 'string',
+              description: 'e.g. /portfolio, /designers, /#contact',
+              validation: (rule) => rule.required(),
+            }),
+          ],
+          preview: {
+            select: {title: 'label', subtitle: 'href'},
+          },
+        }),
+      ],
     }),
     defineField({
       name: 'footerLogo',
@@ -165,6 +204,15 @@ export const siteSettings = defineType({
       type: 'string',
       description: 'Without @, e.g. semta',
       group: 'seo',
+    }),
+    defineField({
+      name: 'googleAnalyticsSnippet',
+      title: 'Google Analytics snippet',
+      type: 'text',
+      rows: 8,
+      group: 'seo',
+      description:
+        'Paste your Google Analytics (gtag.js) snippet from Google, or just the Measurement ID (e.g. G-XXXXXXXX). Injected site-wide in the document head.',
     }),
   ],
   preview: {
