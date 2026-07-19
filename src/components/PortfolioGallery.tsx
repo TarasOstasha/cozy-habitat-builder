@@ -1,9 +1,62 @@
-import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { RowsPhotoAlbum } from "react-photo-album";
+import Lightbox, { type SlideImage } from "yet-another-react-lightbox";
+import Captions from "yet-another-react-lightbox/plugins/captions";
+import Counter from "yet-another-react-lightbox/plugins/counter";
+import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import { CategoryDescription } from "@/components/CategoryDescription";
-import type { GalleryCategory } from "@/lib/portfolio";
+import type { GalleryCategory, GalleryImage } from "@/lib/portfolio";
+
+import "react-photo-album/rows.css";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/thumbnails.css";
+import "yet-another-react-lightbox/plugins/captions.css";
+import "yet-another-react-lightbox/plugins/counter.css";
 
 const VISIBLE_CATEGORIES = 6;
+
+/** Aspect presets so the rows layout can pack tightly without real EXIF sizes. */
+const ASPECT_PRESETS = [
+  { width: 1600, height: 1200 }, // 4:3
+  { width: 1600, height: 1067 }, // 3:2
+  { width: 1600, height: 1000 }, // 8:5
+  { width: 1600, height: 1200 }, // 4:3
+  { width: 1800, height: 1200 }, // 3:2
+  { width: 1600, height: 900 }, // 16:9
+] as const;
+
+type AlbumPhoto = {
+  key: string;
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+};
+
+function toAlbumPhotos(images: GalleryImage[]): AlbumPhoto[] {
+  return images.map((image, index) => {
+    const preset = ASPECT_PRESETS[index % ASPECT_PRESETS.length]!;
+    return {
+      key: image.key,
+      src: image.src,
+      alt: image.alt,
+      width: preset.width,
+      height: preset.height,
+    };
+  });
+}
+
+function toLightboxSlides(photos: AlbumPhoto[]): SlideImage[] {
+  return photos.map((photo) => ({
+    src: photo.src,
+    alt: photo.alt,
+    title: photo.alt,
+    width: photo.width,
+    height: photo.height,
+  }));
+}
 
 type PortfolioGalleryProps = {
   categories: GalleryCategory[];
@@ -12,7 +65,7 @@ type PortfolioGalleryProps = {
 export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
   const [activeId, setActiveId] = useState(categories[0]?.id ?? "");
   const [startIndex, setStartIndex] = useState(0);
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState(-1);
 
   const maxStart = Math.max(0, categories.length - VISIBLE_CATEGORIES);
   const showCategoryNav = categories.length > VISIBLE_CATEGORIES;
@@ -45,58 +98,22 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
     });
   }, [activeId, categories]);
 
+  useEffect(() => {
+    setLightboxIndex(-1);
+  }, [activeId]);
+
   const activeCategory =
     categories.find((category) => category.id === activeId) ?? categories[0];
 
-  const isOpen = lightboxIndex !== null && activeCategory !== undefined;
-  const slideCount = activeCategory?.images.length ?? 0;
-  const currentIndex = lightboxIndex ?? 0;
-  const currentImage = activeCategory?.images[currentIndex];
-
-  const goToSlide = (index: number) => {
-    if (!activeCategory) return;
-    const nextIndex = (index + activeCategory.images.length) % activeCategory.images.length;
-    setLightboxIndex(nextIndex);
-  };
+  const photos = useMemo(
+    () => toAlbumPhotos(activeCategory?.images ?? []),
+    [activeCategory],
+  );
+  const slides = useMemo(() => toLightboxSlides(photos), [photos]);
 
   const scrollCategoriesBy = (step: number) => {
     setStartIndex((current) => Math.min(maxStart, Math.max(0, current + step)));
   };
-
-  useEffect(() => {
-    setLightboxIndex(null);
-  }, [activeId]);
-
-  useEffect(() => {
-    if (!isOpen || !activeCategory) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setLightboxIndex(null);
-        return;
-      }
-      if (event.key === "ArrowLeft") {
-        setLightboxIndex((index) => {
-          if (index === null) return null;
-          return (index - 1 + activeCategory.images.length) % activeCategory.images.length;
-        });
-      }
-      if (event.key === "ArrowRight") {
-        setLightboxIndex((index) => {
-          if (index === null) return null;
-          return (index + 1) % activeCategory.images.length;
-        });
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [isOpen, activeCategory]);
 
   if (!activeCategory) return null;
 
@@ -116,23 +133,39 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
             </button>
           )}
 
-          <div className="flex min-w-0 flex-1 flex-nowrap items-center justify-center gap-x-4 overflow-hidden sm:gap-x-6 md:gap-x-8">
-            {visibleCategories.map((category) => (
-              <button
-                key={category.id}
-                type="button"
-                onClick={() => setActiveId(category.id)}
-                className={`eyebrow shrink-0 cursor-pointer whitespace-nowrap transition-colors ${
-                  category.id === activeId
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-                aria-pressed={category.id === activeId}
-              >
-                {category.label}
-                <span className="ml-1.5 text-muted-foreground/70">({category.images.length})</span>
-              </button>
-            ))}
+          <div
+            className="flex min-w-0 flex-1 flex-nowrap items-center justify-center gap-x-4 overflow-hidden sm:gap-x-6 md:gap-x-8"
+            role="tablist"
+            aria-label="Portfolio categories"
+          >
+            {visibleCategories.map((category) => {
+              const isActive = category.id === activeId;
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setActiveId(category.id)}
+                  className={`eyebrow group relative shrink-0 cursor-pointer whitespace-nowrap pb-2 transition-colors ${
+                    isActive
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {category.label}
+                  <span className="ml-1.5 text-muted-foreground/70">
+                    ({category.images.length})
+                  </span>
+                  <span
+                    className={`absolute inset-x-0 bottom-0 h-px origin-left bg-[color:var(--color-gold)] transition-transform duration-500 ${
+                      isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                    }`}
+                    aria-hidden="true"
+                  />
+                </button>
+              );
+            })}
           </div>
 
           {showCategoryNav && (
@@ -154,98 +187,75 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
           html={activeCategory.descriptionHtml}
         />
 
-        <div className="mt-14 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {activeCategory.images.map((image, index) => (
-            <figure
-              key={image.key}
-              className={`overflow-hidden bg-secondary/30 ${
-                index % 5 === 0 ? "sm:col-span-2 sm:row-span-2" : ""
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() => setLightboxIndex(index)}
-                className="block h-full w-full cursor-zoom-in text-left"
-                aria-label={`View ${image.alt} full size`}
-              >
-                <img
-                  src={image.src}
-                  alt={image.alt}
-                  loading="lazy"
-                  className={`h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02] ${
-                    index % 5 === 0 ? "aspect-4/3 sm:aspect-auto sm:min-h-[520px]" : "aspect-4/3"
-                  }`}
+        <div className="portfolio-album mt-14">
+          <RowsPhotoAlbum
+            photos={photos}
+            targetRowHeight={240}
+            spacing={10}
+            padding={0}
+            sizes={{
+              size: "calc(100vw - 48px)",
+              sizes: [
+                { viewport: "(min-width: 1400px)", size: "1300px" },
+                { viewport: "(min-width: 768px)", size: "calc(100vw - 112px)" },
+              ],
+            }}
+            onClick={({ index }) => setLightboxIndex(index)}
+            componentsProps={{
+              container: {
+                className: "portfolio-album__container",
+              },
+              button: ({ photo }) => ({
+                className:
+                  "portfolio-album__photo group overflow-hidden rounded-[var(--radius)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:ring-offset-2",
+                "aria-label": `View ${photo.alt} full size`,
+              }),
+              image: {
+                className:
+                  "portfolio-album__image transition-transform duration-700 ease-out group-hover:scale-[1.03]",
+              },
+            }}
+            render={{
+              extras: () => (
+                <span
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                  aria-hidden="true"
                 />
-              </button>
-            </figure>
-          ))}
+              ),
+            }}
+          />
         </div>
       </div>
 
-      {isOpen && currentImage && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/92 p-4 md:p-8"
-          onClick={() => setLightboxIndex(null)}
-          role="dialog"
-          aria-modal="true"
-          aria-label={currentImage.alt}
-        >
-          <button
-            type="button"
-            onClick={() => setLightboxIndex(null)}
-            className="absolute right-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center text-white/80 transition-colors hover:text-white md:right-8 md:top-8"
-            aria-label="Close gallery"
-          >
-            <X className="h-6 w-6" />
-          </button>
-
-          {slideCount > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  goToSlide(currentIndex - 1);
-                }}
-                className="absolute left-2 top-1/2 z-10 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center text-white/80 transition-colors hover:text-white md:left-6"
-                aria-label="Previous image"
-              >
-                <ChevronLeft className="h-8 w-8" />
-              </button>
-
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  goToSlide(currentIndex + 1);
-                }}
-                className="absolute right-2 top-1/2 z-10 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center text-white/80 transition-colors hover:text-white md:right-6"
-                aria-label="Next image"
-              >
-                <ChevronRight className="h-8 w-8" />
-              </button>
-            </>
-          )}
-
-          <div
-            className="flex w-full max-w-[1600px] flex-col items-center gap-6"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <img
-              key={currentImage.key}
-              src={currentImage.src}
-              alt={currentImage.alt}
-              className="max-h-[82vh] w-full object-contain"
-            />
-
-            {slideCount > 1 && (
-              <p className="eyebrow text-white/70">
-                {currentIndex + 1} / {slideCount}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+      <Lightbox
+        open={lightboxIndex >= 0}
+        close={() => setLightboxIndex(-1)}
+        index={lightboxIndex}
+        slides={slides}
+        plugins={[Captions, Counter, Thumbnails, Zoom]}
+        carousel={{ finite: slides.length <= 1, padding: 0 }}
+        animation={{ fade: 320 }}
+        controller={{ closeOnBackdropClick: true }}
+        captions={{ descriptionTextAlign: "center", descriptionMaxLines: 2 }}
+        counter={{ container: { style: { top: 16, bottom: "unset" } } }}
+        thumbnails={{
+          position: "bottom",
+          border: 0,
+          borderRadius: 2,
+          padding: 0,
+          gap: 8,
+          imageFit: "cover",
+        }}
+        zoom={{ maxZoomPixelRatio: 2.5, scrollToZoom: true }}
+        styles={{
+          container: { backgroundColor: "rgba(10, 10, 10, 0.94)" },
+          captionsTitle: {
+            fontFamily: "var(--font-display)",
+            fontWeight: 400,
+            letterSpacing: "-0.01em",
+          },
+        }}
+      />
     </>
   );
 }

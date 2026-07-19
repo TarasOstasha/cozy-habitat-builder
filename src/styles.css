@@ -167,3 +167,13 @@
     oklch(0 0 0 / 0) 100%
   );
 }
+
+/* Portfolio gallery — photo album polish */
+.portfolio-album .react-photo-album--button {
+  overflow: hidden;
+  padding: 0;
+}
+
+.portfolio-album .react-photo-album--image {
+  object-fit: cover;
+}
