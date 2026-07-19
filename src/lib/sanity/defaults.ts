@@ -103,6 +103,7 @@ export const defaultHome: HomePage = {
   },
   hero: {
     enabled: true,
+    order: 10,
     eyebrow: "Custom Cabinetry · Residential & Commercial",
     headline: "Cabinetry, designed and built",
     headlineAccent: "around the way you live.",
@@ -113,12 +114,14 @@ export const defaultHome: HomePage = {
   },
   specialization: {
     enabled: true,
+    order: 20,
     eyebrow: "Our Specialization",
     title: "Residential Design",
     body: "Relax and enjoy custom cabinets and storage solutions in your house. The cabinetry experts at SEMTA can build and install custom cabinets and storage for any room of the home - with unique style and design.",
   },
   workPreview: {
     enabled: true,
+    order: 30,
     eyebrow: "Our Work",
     title: "Crafted for real homes.",
     body: "A selection of recent kitchens, baths and built-ins from our Norwalk studio — each project drawn from how our clients live.",
@@ -128,6 +131,7 @@ export const defaultHome: HomePage = {
   },
   portfolio: {
     enabled: true,
+    order: 40,
     eyebrow: "Our Work",
     title: "Kitchens tailored to the families that live in them.",
     body: "Every SEMTA project begins with a conversation about how you cook, gather and live. Browse a selection of recent work — each piece designed, built and installed by our Norwalk team.",
@@ -146,6 +150,7 @@ export const defaultHome: HomePage = {
   },
   services: {
     enabled: true,
+    order: 50,
     eyebrow: "Our Services",
     title: "From first sketch to final install.",
     items: [
@@ -177,6 +182,7 @@ export const defaultHome: HomePage = {
   },
   craftsmanship: {
     enabled: true,
+    order: 60,
     eyebrow: "Made in Norwalk",
     quote:
       "All installation is done by our own craftsmen - trained to ensure that your project is installed precisely.",
@@ -184,12 +190,18 @@ export const defaultHome: HomePage = {
   },
   partners: {
     enabled: true,
+    order: 70,
     eyebrow: "Our Partners",
     title: "Trusted by designers and builders.",
     body: "We collaborate with interior designers, architects and builders across Connecticut to bring precision cabinetry to every project.",
   },
+  reviews: {
+    enabled: true,
+    order: 80,
+  },
   contact: {
     enabled: true,
+    order: 90,
     eyebrow: "Contact",
     title: "Book an appointment.",
     body: "We are available to answer any questions you may have. Visit our studio by appointment or send us a message to begin your project.",

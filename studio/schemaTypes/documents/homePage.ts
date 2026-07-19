@@ -1,9 +1,11 @@
 import {HomeIcon} from '@sanity/icons/Home'
 import {defineField, defineType} from 'sanity'
+import {customBlockMembers} from '../objects/customBlocks'
 import {
   imageWithAlt,
   sectionEnabledField,
   sectionIntroFields,
+  sectionOrderField,
   serviceItem,
   workPreviewProject,
 } from '../objects/sectionFields'
@@ -22,6 +24,8 @@ export const homePage = defineType({
     {name: 'services', title: 'Services'},
     {name: 'craftsmanship', title: 'Craftsmanship'},
     {name: 'partners', title: 'Partners'},
+    {name: 'reviews', title: 'Reviews'},
+    {name: 'customBlocks', title: 'Custom blocks'},
     {name: 'contact', title: 'Contact'},
   ],
   fields: [
@@ -39,6 +43,7 @@ export const homePage = defineType({
       group: 'hero',
       fields: [
         sectionEnabledField,
+        sectionOrderField(10),
         defineField({name: 'eyebrow', title: 'Eyebrow', type: 'string'}),
         defineField({
           name: 'headline',
@@ -81,7 +86,7 @@ export const homePage = defineType({
       title: 'Specialization',
       type: 'object',
       group: 'specialization',
-      fields: [sectionEnabledField, ...sectionIntroFields],
+      fields: [sectionEnabledField, sectionOrderField(20), ...sectionIntroFields],
     }),
 
     defineField({
@@ -92,6 +97,7 @@ export const homePage = defineType({
       description: 'Homepage “Our Work / Crafted for real homes” section',
       fields: [
         sectionEnabledField,
+        sectionOrderField(30),
         ...sectionIntroFields,
         defineField({
           name: 'projects',
@@ -120,6 +126,7 @@ export const homePage = defineType({
       group: 'portfolio',
       fields: [
         sectionEnabledField,
+        sectionOrderField(40),
         ...sectionIntroFields,
         defineField({
           name: 'viewFullLabel',
@@ -152,6 +159,7 @@ export const homePage = defineType({
       group: 'services',
       fields: [
         sectionEnabledField,
+        sectionOrderField(50),
         defineField({name: 'eyebrow', title: 'Eyebrow', type: 'string'}),
         defineField({
           name: 'title',
@@ -176,6 +184,7 @@ export const homePage = defineType({
       group: 'craftsmanship',
       fields: [
         sectionEnabledField,
+        sectionOrderField(60),
         defineField({name: 'eyebrow', title: 'Eyebrow', type: 'string'}),
         defineField({
           name: 'quote',
@@ -202,8 +211,28 @@ export const homePage = defineType({
           initialValue: true,
           description: 'Uncheck to hide the whole Partners block on the homepage',
         }),
+        sectionOrderField(70),
         ...sectionIntroFields,
       ],
+    }),
+
+    defineField({
+      name: 'reviews',
+      title: 'Reviews',
+      type: 'object',
+      group: 'reviews',
+      description: 'Google reviews section (content is still hardcoded until Google is connected)',
+      fields: [sectionEnabledField, sectionOrderField(80)],
+    }),
+
+    defineField({
+      name: 'customBlocks',
+      title: 'Custom blocks',
+      type: 'array',
+      group: 'customBlocks',
+      description:
+        'Add optional sections anywhere on the homepage — text, image+text, CTA, or HTML embeds. Drag to reorder within the same placement.',
+      of: customBlockMembers,
     }),
 
     defineField({
@@ -213,6 +242,7 @@ export const homePage = defineType({
       group: 'contact',
       fields: [
         sectionEnabledField,
+        sectionOrderField(90),
         ...sectionIntroFields,
         defineField({
           name: 'studioLabel',

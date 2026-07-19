@@ -57,6 +57,7 @@ export type SiteSettings = {
 
 export type SectionIntro = {
   enabled?: boolean | null;
+  order?: number | null;
   eyebrow?: string | null;
   title?: string | null;
   body?: string | null;
@@ -77,10 +78,68 @@ export type WorkPreviewProject = {
   image?: SanityImage | null;
 };
 
+export type CustomBlockPlacement =
+  | "afterHero"
+  | "afterSpecialization"
+  | "afterWorkPreview"
+  | "afterPortfolio"
+  | "afterServices"
+  | "afterCraftsmanship"
+  | "afterPartners"
+  | "afterReviews"
+  | "beforeContact"
+  | string;
+
+export type CustomBlockBase = {
+  _key: string;
+  _type: string;
+  enabled?: boolean | null;
+  placement?: CustomBlockPlacement | null;
+  sectionId?: { current?: string | null } | null;
+  navLabel?: string | null;
+  eyebrow?: string | null;
+  title?: string | null;
+};
+
+export type CustomTextBlock = CustomBlockBase & {
+  _type: "customTextBlock";
+  body?: JsonValue[] | null;
+};
+
+export type CustomImageTextBlock = CustomBlockBase & {
+  _type: "customImageTextBlock";
+  body?: JsonValue[] | null;
+  image?: SanityImage | null;
+  imagePosition?: "left" | "right" | string | null;
+  ctaLabel?: string | null;
+  ctaHref?: string | null;
+};
+
+export type CustomCtaBlock = CustomBlockBase & {
+  _type: "customCtaBlock";
+  body?: string | null;
+  buttonLabel?: string | null;
+  buttonHref?: string | null;
+};
+
+export type CustomHtmlBlock = CustomBlockBase & {
+  _type: "customHtmlBlock";
+  heading?: string | null;
+  html?: string | null;
+};
+
+export type CustomBlock =
+  | CustomTextBlock
+  | CustomImageTextBlock
+  | CustomCtaBlock
+  | CustomHtmlBlock
+  | (CustomBlockBase & { [key: string]: JsonValue | undefined });
+
 export type HomePage = {
   seo?: PageSeo | null;
   hero?: {
     enabled?: boolean | null;
+    order?: number | null;
     eyebrow?: string | null;
     headline?: string | null;
     headlineAccent?: string | null;
@@ -112,18 +171,25 @@ export type HomePage = {
     | null;
   services?: {
     enabled?: boolean | null;
+    order?: number | null;
     eyebrow?: string | null;
     title?: string | null;
     items?: ServiceItem[] | null;
   } | null;
   craftsmanship?: {
     enabled?: boolean | null;
+    order?: number | null;
     eyebrow?: string | null;
     quote?: string | null;
     attribution?: string | null;
     image?: SanityImage | null;
   } | null;
   partners?: SectionIntro | null;
+  reviews?: {
+    enabled?: boolean | null;
+    order?: number | null;
+  } | null;
+  customBlocks?: CustomBlock[] | null;
   contact?:
     | (SectionIntro & {
         studioLabel?: string | null;

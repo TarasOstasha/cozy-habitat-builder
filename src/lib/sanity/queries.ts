@@ -52,6 +52,7 @@ export const HOME_PAGE_QUERY = defineQuery(/* groq */ `
       seo{ ${seoProjection} },
       hero{
         enabled,
+        order,
         eyebrow,
         headline,
         headlineAccent,
@@ -64,6 +65,7 @@ export const HOME_PAGE_QUERY = defineQuery(/* groq */ `
       specialization,
       workPreview{
         enabled,
+        order,
         eyebrow,
         title,
         body,
@@ -79,6 +81,7 @@ export const HOME_PAGE_QUERY = defineQuery(/* groq */ `
       },
       portfolio{
         enabled,
+        order,
         eyebrow,
         title,
         body,
@@ -99,18 +102,43 @@ export const HOME_PAGE_QUERY = defineQuery(/* groq */ `
       },
       services{
         enabled,
+        order,
         eyebrow,
         title,
         items[]{ _key, number, title, body }
       },
       craftsmanship{
         enabled,
+        order,
         eyebrow,
         quote,
         attribution,
         image{ ${imageProjection} }
       },
       partners,
+      reviews{
+        enabled,
+        order
+      },
+      customBlocks[]{
+        _key,
+        _type,
+        enabled,
+        placement,
+        sectionId,
+        navLabel,
+        eyebrow,
+        title,
+        heading,
+        body,
+        html,
+        image{ ${imageProjection} },
+        imagePosition,
+        ctaLabel,
+        ctaHref,
+        buttonLabel,
+        buttonHref
+      },
       contact
     },
     "partnersList": *[_type == "partner" && enabled != false] | order(order asc, name asc){

@@ -9,6 +9,22 @@ export const sectionEnabledField = defineField({
   description: 'Uncheck to hide this section on the homepage',
 })
 
+/**
+ * Numeric sort key for homepage sections.
+ * Lower numbers render first. Defaults use gaps of 10 so new sections can be inserted.
+ */
+export function sectionOrderField(initialValue: number) {
+  return defineField({
+    name: 'order',
+    title: 'Order index',
+    type: 'number',
+    initialValue,
+    description:
+      'Controls homepage position. Lower numbers appear first (e.g. 10, 20, 30…). Change these to reorder sections.',
+    validation: (rule) => rule.integer().min(0).warning('Use whole numbers (0, 10, 20…)'),
+  })
+}
+
 /** Shared eyebrow + title + body pattern used across homepage sections. */
 export const sectionIntroFields = [
   defineField({
