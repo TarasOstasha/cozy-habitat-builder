@@ -3,11 +3,11 @@ import { ContactForm } from "@/components/ContactForm";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { defaultDesigners, defaultSettings, pick } from "@/lib/sanity/defaults";
-import { fetchDesignersPage } from "@/lib/sanity/fetch";
+import { loadDesignersPage } from "@/lib/sanity/load-designers-page";
 import { buildSeoHead } from "@/lib/sanity/seo-head";
 
 export const Route = createFileRoute("/designers")({
-  loader: () => fetchDesignersPage(),
+  loader: () => loadDesignersPage(),
   head: ({ loaderData }) =>
     buildSeoHead({
       seo: loaderData?.designers?.seo,

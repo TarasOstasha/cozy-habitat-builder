@@ -4,11 +4,11 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { galleryFromLocal } from "@/lib/portfolio";
 import { defaultPortfolio, defaultSettings, pick } from "@/lib/sanity/defaults";
-import { fetchPortfolioPage } from "@/lib/sanity/fetch";
+import { loadPortfolioPage } from "@/lib/sanity/load-portfolio-page";
 import { buildSeoHead, galleryFromSanity } from "@/lib/sanity/seo-head";
 
 export const Route = createFileRoute("/portfolio")({
-  loader: () => fetchPortfolioPage(),
+  loader: () => loadPortfolioPage(),
   head: ({ loaderData }) =>
     buildSeoHead({
       seo: loaderData?.portfolio?.seo,

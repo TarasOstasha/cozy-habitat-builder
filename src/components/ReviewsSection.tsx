@@ -49,6 +49,8 @@ type ReviewsSectionProps = {
   rating?: number;
   totalCount?: number;
   googleMapsUrl?: string;
+  /** When true, shows required Google attribution for Places API content. */
+  fromGoogle?: boolean;
 };
 
 export function ReviewsSection({
@@ -56,6 +58,7 @@ export function ReviewsSection({
   rating = reviewsSummary.rating,
   totalCount = reviewsSummary.totalCount,
   googleMapsUrl = reviewsSummary.googleMapsUrl,
+  fromGoogle = false,
 }: ReviewsSectionProps) {
   if (!reviews.length) return null;
 
@@ -99,6 +102,19 @@ export function ReviewsSection({
           >
             View all reviews
           </a>
+          {fromGoogle ? (
+            <p className="mt-6 text-xs text-muted-foreground">
+              Reviews from{" "}
+              <a
+                href={googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-foreground"
+              >
+                Google
+              </a>
+            </p>
+          ) : null}
         </div>
       </div>
     </section>

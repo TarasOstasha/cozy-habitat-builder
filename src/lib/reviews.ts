@@ -1,4 +1,4 @@
-/** Hardcoded Google-style reviews. Swap this source for Places API / CMS later. */
+/** Fallback reviews used when Google Places API is unavailable. */
 
 export type Review = {
   id: string;
@@ -13,6 +13,11 @@ export type ReviewsSummary = {
   totalCount: number;
   /** Public Google Business / Maps reviews URL. */
   googleMapsUrl: string;
+};
+
+export type ReviewsPayload = ReviewsSummary & {
+  reviews: Review[];
+  source?: "google" | "fallback";
 };
 
 /** Opens Google Maps search for the SEMTA listing (swap for exact place URL when you have it). */

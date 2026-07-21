@@ -15,7 +15,8 @@ import slide2 from "@/assets/semta-slide2.jpg";
 import slide4 from "@/assets/semta-slide4.jpg";
 import craftsmanshipFallback from "@/assets/craftsmanship.jpg";
 import { defaultHome, defaultSettings, isSectionEnabled, pick } from "@/lib/sanity/defaults";
-import { fetchHomePage } from "@/lib/sanity/fetch";
+import { loadGoogleReviews } from "@/lib/google-reviews/load-google-reviews";
+import { loadHomePage } from "@/lib/sanity/load-home-page";
 import {
   HERO_IMAGE_SIZES,
   HERO_SRCSET_WIDTHS,
@@ -33,7 +34,10 @@ import { buildSeoHead } from "@/lib/sanity/seo-head";
 import { landingSections } from "@/lib/landing-sections";
 
 export const Route = createFileRoute("/")({
-  loader: () => fetchHomePage(),
+  loader: async () => {
+    const [homeData, googleReviews] = await Promise.all([loadHomePage(), loadGoogleReviews()]);
+    return { ...homeData, googleReviews };
+  },
   head: ({ loaderData }) => {
     const seo = buildSeoHead({
       seo: loaderData?.home?.seo,
@@ -79,7 +83,7 @@ function scrollToPortfolio() {
 }
 
 function Index() {
-  const { home, settings, partnersList } = Route.useLoaderData();
+  const { home, settings, partnersList, googleReviews } = Route.useLoaderData();
   const h = home ?? defaultHome;
   const s = settings ?? defaultSettings;
 
@@ -410,7 +414,15 @@ function Index() {
       />
     ) : null,
 
-    reviews: showReviews ? <ReviewsSection /> : null,
+    reviews: showReviews ? (
+      <ReviewsSection
+        reviews={googleReviews.reviews}
+        rating={googleReviews.rating}
+        totalCount={googleReviews.totalCount}
+        googleMapsUrl={googleReviews.googleMapsUrl}
+        fromGoogle={googleReviews.source === "google"}
+      />
+    ) : null,
 
     contact: showContact ? (
       <section
