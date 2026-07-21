@@ -7,6 +7,7 @@ import {structure} from './structure'
 export default defineConfig({
   name: 'default',
   title: 'SEMTA',
+  basePath: '/studio',
 
   projectId: '43r4kll9',
   dataset: 'production',

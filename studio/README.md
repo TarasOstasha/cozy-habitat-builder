@@ -4,6 +4,8 @@ Content backend for the SEMTA website.
 
 - **Project ID:** `43r4kll9`
 - **Dataset:** `production`
+- **Hosted Studio:** https://semta.sanity.studio/
+- **Website Studio:** https://semta-master.vercel.app/studio
 - **Manage:** https://www.sanity.io/manage/project/43r4kll9
 
 ## Commands
