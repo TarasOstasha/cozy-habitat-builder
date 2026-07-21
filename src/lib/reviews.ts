@@ -22,7 +22,8 @@ export type ReviewsPayload = ReviewsSummary & {
 
 /** Opens Google Maps search for the SEMTA listing (swap for exact place URL when you have it). */
 export const GOOGLE_REVIEWS_URL =
-  "https://www.google.com/maps/search/?api=1&query=SEMTA+Custom+Cabinetry+%26+Design+257+Ely+Ave+Norwalk+CT";
+"https://www.google.com/maps/place/SEMTA+Custom+Cabinetry+%26+Design,+LLC/@41.0847619,-73.4252148,17z/data=!4m8!3m7!1s0x89e81f5132e8473d:0xf94271650f875df!8m2!3d41.0847619!4d-73.4252148!9m1!1b1!16s%2Fg%2F11h_szf6s5?entry=ttu&g_ep=EgoyMDI2MDcxOS4wIKXMDSoASAFQAw%3D%3D"
+  // "https://www.google.com/maps/search/?api=1&query=SEMTA+Custom+Cabinetry+%26+Design+257+Ely+Ave+Norwalk+CT";
 
 export const reviewsSummary: ReviewsSummary = {
   rating: 5,
