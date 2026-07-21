@@ -1,0 +1,30 @@
+# SEMTA Sanity Studio
+
+Content backend for the SEMTA website.
+
+- **Project ID:** `43r4kll9`
+- **Dataset:** `production`
+- **Hosted Studio:** https://semta.sanity.studio/
+- **Website Studio:** https://semta-master.vercel.app/studio
+- **Manage:** https://www.sanity.io/manage/project/43r4kll9
+
+## Commands
+
+Run from the `sanity/` folder (or use root `npm run dev:studio` / `npm run seed:sanity`):
+
+```bash
+npm run dev            # Standalone Studio at http://localhost:3333/studio
+npm run seed           # Re-seed homepage + settings + partners
+npm run schema:deploy  # Deploy schema after local changes
+npm run deploy         # Deploy hosted Studio
+```
+
+Embedded Studio in the website: http://localhost:8080/studio (during `npm run dev` in project root).
+
+## Content model
+
+| Document | Purpose |
+|----------|---------|
+| **Site Settings** | Brand, **Footer** (logo, tagline, nav links), phone/email/address, SEO defaults |
+| **Home Page** | Tabbed settings for every homepage section (Hero, Specialization, Our Work + featured projects, Portfolio, Services, Craftsmanship, Partners, Contact) |
+| **Partners** | Partner logos shown in the partners carousel |
