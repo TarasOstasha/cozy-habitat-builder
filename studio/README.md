@@ -2,9 +2,9 @@
 
 Content backend for the SEMTA website.
 
-- **Project ID:** `sgbbdc2e`
+- **Project ID:** `43r4kll9`
 - **Dataset:** `production`
-- **Manage:** https://www.sanity.io/manage/project/sgbbdc2e
+- **Manage:** https://www.sanity.io/manage/project/43r4kll9
 
 ## Commands
 

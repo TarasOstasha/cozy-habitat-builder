@@ -221,7 +221,8 @@ export const homePage = defineType({
       title: 'Reviews',
       type: 'object',
       group: 'reviews',
-      description: 'Google reviews section (content is still hardcoded until Google is connected)',
+      description:
+        'Show or hide the Google reviews section. Review content is loaded from Google Places when configured.',
       fields: [sectionEnabledField, sectionOrderField(80)],
     }),
 

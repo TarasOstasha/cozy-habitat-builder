@@ -8,7 +8,7 @@ export default defineConfig({
   name: 'default',
   title: 'SEMTA',
 
-  projectId: 'sgbbdc2e',
+  projectId: '43r4kll9',
   dataset: 'production',
 
   plugins: [structureTool({structure}), visionTool()],
