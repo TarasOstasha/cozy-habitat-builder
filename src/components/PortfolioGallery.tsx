@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { RowsPhotoAlbum } from "react-photo-album";
 import { CategoryDescription } from "@/components/CategoryDescription";
@@ -14,10 +14,10 @@ const PortfolioLightbox = lazy(() =>
   })),
 );
 
-const VISIBLE_CATEGORIES = 6;
 const TARGET_ROW_HEIGHT = 240;
 const ROW_SPACING = 10;
 const MOBILE_BREAKPOINT = 768;
+const TAB_SCROLL_STEP = 160;
 
 const GALLERY_LOAD_STRATEGY = {
   mobile: { eagerCount: 2, highPriorityCount: 1, photosPerRow: 2 },
@@ -36,6 +36,57 @@ function useGalleryLoadStrategy() {
   }, []);
 
   return isMobile ? GALLERY_LOAD_STRATEGY.mobile : GALLERY_LOAD_STRATEGY.desktop;
+}
+
+function useCategoryTabScroll() {
+  const tabListRef = useRef<HTMLDivElement>(null);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
+  const updateScrollButtons = useCallback(() => {
+    const el = tabListRef.current;
+    if (!el) return;
+    const maxScrollLeft = el.scrollWidth - el.clientWidth;
+    setCanScrollPrev(el.scrollLeft > 1);
+    setCanScrollNext(el.scrollLeft < maxScrollLeft - 1);
+  }, []);
+
+  useEffect(() => {
+    const el = tabListRef.current;
+    if (!el) return;
+
+    updateScrollButtons();
+    el.addEventListener("scroll", updateScrollButtons, { passive: true });
+    const observer = new ResizeObserver(updateScrollButtons);
+    observer.observe(el);
+
+    return () => {
+      el.removeEventListener("scroll", updateScrollButtons);
+      observer.disconnect();
+    };
+  }, [updateScrollButtons]);
+
+  const scrollTabsBy = useCallback((direction: -1 | 1) => {
+    tabListRef.current?.scrollBy({
+      left: direction * TAB_SCROLL_STEP,
+      behavior: "smooth",
+    });
+  }, []);
+
+  const scrollActiveTabIntoView = useCallback(() => {
+    const el = tabListRef.current;
+    const activeTab = el?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+    activeTab?.scrollIntoView({ inline: "nearest", block: "nearest", behavior: "smooth" });
+  }, []);
+
+  return {
+    tabListRef,
+    canScrollPrev,
+    canScrollNext,
+    scrollTabsBy,
+    scrollActiveTabIntoView,
+    updateScrollButtons,
+  };
 }
 
 /** Fallback aspect presets when Sanity has no dimensions. */
@@ -107,18 +158,19 @@ type PortfolioGalleryProps = {
 
 export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
   const { eagerCount, highPriorityCount, photosPerRow } = useGalleryLoadStrategy();
+  const {
+    tabListRef,
+    canScrollPrev,
+    canScrollNext,
+    scrollTabsBy,
+    scrollActiveTabIntoView,
+    updateScrollButtons,
+  } = useCategoryTabScroll();
   const [activeId, setActiveId] = useState(categories[0]?.id ?? "");
-  const [startIndex, setStartIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState(-1);
   const [lightboxMounted, setLightboxMounted] = useState(false);
 
-  const maxStart = Math.max(0, categories.length - VISIBLE_CATEGORIES);
-  const showCategoryNav = categories.length > VISIBLE_CATEGORIES;
-  const visibleCategories = showCategoryNav
-    ? categories.slice(startIndex, startIndex + VISIBLE_CATEGORIES)
-    : categories;
-  const canPrev = startIndex > 0;
-  const canNext = startIndex < maxStart;
+  const showCategoryNav = canScrollPrev || canScrollNext;
 
   useEffect(() => {
     if (!categories.some((category) => category.id === activeId)) {
@@ -127,21 +179,12 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
   }, [categories, activeId]);
 
   useEffect(() => {
-    setStartIndex((current) => Math.min(current, maxStart));
-  }, [maxStart]);
+    updateScrollButtons();
+  }, [categories, updateScrollButtons]);
 
   useEffect(() => {
-    const activeIndex = categories.findIndex((category) => category.id === activeId);
-    if (activeIndex < 0 || categories.length <= VISIBLE_CATEGORIES) return;
-
-    setStartIndex((current) => {
-      if (activeIndex < current) return activeIndex;
-      if (activeIndex >= current + VISIBLE_CATEGORIES) {
-        return activeIndex - VISIBLE_CATEGORIES + 1;
-      }
-      return current;
-    });
-  }, [activeId, categories]);
+    scrollActiveTabIntoView();
+  }, [activeId, scrollActiveTabIntoView]);
 
   useEffect(() => {
     setLightboxIndex(-1);
@@ -161,7 +204,7 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
   );
 
   const scrollCategoriesBy = (step: number) => {
-    setStartIndex((current) => Math.min(maxStart, Math.max(0, current + step)));
+    scrollTabsBy(step < 0 ? -1 : 1);
   };
 
   const openLightbox = (index: number) => {
@@ -179,7 +222,7 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
             <button
               type="button"
               onClick={() => scrollCategoriesBy(-1)}
-              disabled={!canPrev}
+              disabled={!canScrollPrev}
               className="inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
               aria-label="Previous categories"
             >
@@ -187,46 +230,49 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
             </button>
           )}
 
-          <div
-            className="flex min-w-0 flex-1 flex-nowrap items-center justify-center gap-x-4 overflow-hidden sm:gap-x-6 md:gap-x-8"
-            role="tablist"
-            aria-label="Portfolio categories"
-          >
-            {visibleCategories.map((category) => {
-              const isActive = category.id === activeId;
-              return (
-                <button
-                  key={category.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => setActiveId(category.id)}
-                  className={`eyebrow group relative shrink-0 cursor-pointer whitespace-nowrap pb-2 transition-colors ${
-                    isActive
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {category.label}
-                  <span className="ml-1.5 text-muted-foreground/70">
-                    ({category.images.length})
-                  </span>
-                  <span
-                    className={`absolute inset-x-0 bottom-0 h-px origin-left bg-[color:var(--color-gold)] transition-transform duration-500 ${
-                      isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+          <div className="flex min-w-0 flex-1 justify-center">
+            <div
+              ref={tabListRef}
+              className="flex max-w-full flex-nowrap items-center gap-x-4 overflow-x-auto scroll-smooth sm:gap-x-6 md:gap-x-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+              role="tablist"
+              aria-label="Portfolio categories"
+            >
+              {categories.map((category) => {
+                const isActive = category.id === activeId;
+                return (
+                  <button
+                    key={category.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => setActiveId(category.id)}
+                    className={`eyebrow group relative shrink-0 cursor-pointer whitespace-nowrap pb-2 transition-colors ${
+                      isActive
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
                     }`}
-                    aria-hidden="true"
-                  />
-                </button>
-              );
-            })}
+                  >
+                    {category.label}
+                    <span className="ml-1.5 text-muted-foreground/70">
+                      ({category.images.length})
+                    </span>
+                    <span
+                      className={`absolute inset-x-0 bottom-0 h-px origin-left bg-[color:var(--color-gold)] transition-transform duration-500 ${
+                        isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {showCategoryNav && (
             <button
               type="button"
               onClick={() => scrollCategoriesBy(1)}
-              disabled={!canNext}
+              disabled={!canScrollNext}
               className="inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
               aria-label="Next categories"
             >
