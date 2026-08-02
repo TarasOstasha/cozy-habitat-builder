@@ -66,7 +66,7 @@ export function SiteHeader({
           href="/"
           brandName={brandName}
           brandTagline={brandTagline}
-          className="items-start lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:items-center"
+          className="lg:absolute lg:left-1/2 lg:-translate-x-1/2"
         />
 
         <nav className="hidden lg:flex items-center gap-4 xl:gap-8">

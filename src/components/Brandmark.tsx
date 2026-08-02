@@ -20,9 +20,9 @@ export function Brandmark({
   const sub = invert ? "text-white/70" : "text-muted-foreground";
   const content = (
     <>
-      <span className={`font-display text-2xl tracking-[0.35em] ${gold}`}>{name}</span>
+      <span className={`font-display text-2xl tracking-[0.35em] -mr-[0.35em] ${gold}`}>{name}</span>
       <span
-        className={`mt-2 text-[0.4rem] tracking-[0.15em] uppercase sm:text-[0.55rem] sm:tracking-[0.4em] ${sub}`}
+        className={`mt-2 text-[0.4rem] tracking-[0.15em] -mr-[0.15em] uppercase sm:text-[0.55rem] sm:tracking-[0.4em] sm:-mr-[0.4em] ${sub}`}
       >
         {tagline}
       </span>
