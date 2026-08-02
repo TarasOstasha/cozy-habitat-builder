@@ -1,5 +1,6 @@
 import {SearchIcon} from '@sanity/icons/Search'
 import {defineField, defineType} from 'sanity'
+import {IMAGE_FIELD_ACCEPT} from './sectionFields'
 
 /**
  * Reusable page SEO object — smart defaults with optional overrides.
@@ -68,7 +69,7 @@ export const seo = defineType({
       title: 'Social share image',
       type: 'image',
       description: 'Open Graph / Twitter image (1200×630 recommended)',
-      options: {hotspot: true},
+      options: {hotspot: true, accept: IMAGE_FIELD_ACCEPT},
       fields: [
         defineField({
           name: 'alt',

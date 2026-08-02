@@ -52,3 +52,56 @@ export function sanityImageSrcSet(
 export function sanityHeroImageUrl(image: SanityImage | null | undefined): string | null {
   return sanityImageUrl(image, 1080);
 }
+
+/** Widths for portfolio grid thumbnails (~240px row height). */
+export const GALLERY_THUMB_WIDTHS = [320, 480, 640, 800] as const;
+
+export const GALLERY_THUMB_FALLBACK_WIDTH = 640;
+export const GALLERY_LIGHTBOX_WIDTH = 1920;
+export const GALLERY_LIGHTBOX_THUMB_WIDTH = 120;
+
+export type GalleryImageUrls = {
+  src: string;
+  srcSet: { src: string; width: number; height: number }[];
+  fullSrc: string;
+  thumbSrc: string;
+};
+
+function galleryThumbHeight(width: number, aspectRatio = 4 / 3) {
+  return Math.round(width / aspectRatio);
+}
+
+/** Responsive thumb URLs for the grid plus full-size / lightbox-strip variants. */
+export function sanityGalleryImageUrls(
+  image: SanityImage | null | undefined,
+): GalleryImageUrls | null {
+  if (!image?.asset) return null;
+  try {
+    const srcSet = GALLERY_THUMB_WIDTHS.map((width) => ({
+      src: urlFor(image).width(width).auto("format").quality(70).url(),
+      width,
+      height: galleryThumbHeight(width),
+    }));
+
+    const fallback =
+      srcSet.find((entry) => entry.width === GALLERY_THUMB_FALLBACK_WIDTH) ??
+      srcSet[srcSet.length - 1]!;
+
+    return {
+      src: fallback.src,
+      srcSet,
+      fullSrc: urlFor(image)
+        .width(GALLERY_LIGHTBOX_WIDTH)
+        .auto("format")
+        .quality(80)
+        .url(),
+      thumbSrc: urlFor(image)
+        .width(GALLERY_LIGHTBOX_THUMB_WIDTH)
+        .auto("format")
+        .quality(65)
+        .url(),
+    };
+  } catch {
+    return null;
+  }
+}

@@ -46,11 +46,19 @@ export const sectionIntroFields = [
   }),
 ]
 
+/** Includes iPhone HEIC/HEIF photos and .MOV videos (auto-converted to JPEG on upload). */
+export const IMAGE_FIELD_ACCEPT =
+  'image/*,.heic,.heif,.mov,.mp4,.m4v,image/heic,image/heif,video/quicktime,video/mp4'
+
 export const imageWithAlt = defineField({
   name: 'image',
   title: 'Image',
   type: 'image',
-  options: {hotspot: true},
+  options: {
+    hotspot: true,
+    accept: IMAGE_FIELD_ACCEPT,
+  },
+  description: 'JPEG, PNG, WebP, HEIC, and .MOV are supported. iPhone files are converted automatically.',
   fields: [
     defineField({
       name: 'alt',
@@ -135,7 +143,11 @@ export const workPreviewProject = defineArrayMember({
       name: 'image',
       title: 'Image',
       type: 'image',
-      options: {hotspot: true},
+      options: {
+        hotspot: true,
+        accept: IMAGE_FIELD_ACCEPT,
+      },
+      description: 'JPEG, PNG, WebP, HEIC, and .MOV are supported. iPhone files are converted automatically.',
       fields: [
         defineField({
           name: 'alt',

@@ -1,5 +1,5 @@
 import type { PageSeo, JsonValue, SanityImage, SiteSettings } from "./types";
-import { sanityImageUrl } from "./image";
+import { sanityGalleryImageUrls, sanityImageUrl } from "./image";
 import type { GalleryCategory } from "@/lib/portfolio";
 
 type SeoHeadInput = {
@@ -113,15 +113,29 @@ export function galleryFromSanity(
       const label = category.title || "Untitled";
       const images = (category.images ?? [])
         .map((image, imageIndex) => {
-          const src = sanityImageUrl(image, 1600);
-          if (!src) return null;
+          const urls = sanityGalleryImageUrls(image);
+          if (!urls) return null;
           return {
             key: `${id}-${imageIndex}`,
-            src,
             alt: image.alt || `${label} project ${imageIndex + 1}`,
+            src: urls.src,
+            srcSet: urls.srcSet,
+            fullSrc: urls.fullSrc,
+            thumbSrc: urls.thumbSrc,
           };
         })
-        .filter((image): image is { key: string; src: string; alt: string } => image !== null);
+        .filter(
+          (
+            image,
+          ): image is {
+            key: string;
+            alt: string;
+            src: string;
+            srcSet: { src: string; width: number; height: number }[];
+            fullSrc: string;
+            thumbSrc: string;
+          } => image !== null,
+        );
 
       const mode: "richText" | "html" =
         category.descriptionMode === "html" ? "html" : "richText";

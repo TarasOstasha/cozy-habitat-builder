@@ -25,8 +25,15 @@ export type PortfolioCategory = {
 
 export type GalleryImage = {
   key: string;
-  src: string;
   alt: string;
+  /** Grid thumbnail fallback URL. */
+  src: string;
+  /** Responsive grid variants (Sanity CDN). */
+  srcSet?: { src: string; width: number; height: number }[];
+  /** Full-size URL for the lightbox main view. */
+  fullSrc: string;
+  /** Small URL for the lightbox thumbnail strip. */
+  thumbSrc?: string;
 };
 
 export type GalleryCategory = {
@@ -87,6 +94,7 @@ export function galleryFromLocal(categories: PortfolioCategory[] = localPortfoli
     images: category.images.map((src, index) => ({
       key: `${category.id}-${index}`,
       src,
+      fullSrc: src,
       alt: `${category.label} project ${index + 1}`,
     })),
   }));

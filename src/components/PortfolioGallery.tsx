@@ -30,9 +30,12 @@ const ASPECT_PRESETS = [
 type AlbumPhoto = {
   key: string;
   src: string;
+  srcSet?: readonly { src: string; width: number; height: number }[];
   alt: string;
   width: number;
   height: number;
+  fullSrc: string;
+  thumbSrc?: string;
 };
 
 function toAlbumPhotos(images: GalleryImage[]): AlbumPhoto[] {
@@ -41,20 +44,26 @@ function toAlbumPhotos(images: GalleryImage[]): AlbumPhoto[] {
     return {
       key: image.key,
       src: image.src,
+      srcSet: image.srcSet,
       alt: image.alt,
       width: preset.width,
       height: preset.height,
+      fullSrc: image.fullSrc,
+      thumbSrc: image.thumbSrc,
     };
   });
 }
 
-function toLightboxSlides(photos: AlbumPhoto[]): SlideImage[] {
+type LightboxSlide = SlideImage & { thumbnail?: string };
+
+function toLightboxSlides(photos: AlbumPhoto[]): LightboxSlide[] {
   return photos.map((photo) => ({
-    src: photo.src,
+    src: photo.fullSrc,
     alt: photo.alt,
     title: photo.alt,
     width: photo.width,
     height: photo.height,
+    thumbnail: photo.thumbSrc,
   }));
 }
 
@@ -210,10 +219,13 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
                   "portfolio-album__photo group overflow-hidden rounded-[var(--radius)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:ring-offset-2",
                 "aria-label": `View ${photo.alt} full size`,
               }),
-              image: {
+              image: ({ index }) => ({
                 className:
                   "portfolio-album__image transition-transform duration-700 ease-out group-hover:scale-[1.03]",
-              },
+                loading: index < 2 ? "eager" : "lazy",
+                decoding: "async",
+                ...(index === 0 ? { fetchPriority: "high" as const } : {}),
+              }),
             }}
             render={{
               extras: () => (

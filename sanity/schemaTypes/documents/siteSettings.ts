@@ -1,5 +1,6 @@
 import {CogIcon} from '@sanity/icons/Cog'
 import {defineArrayMember, defineField, defineType} from 'sanity'
+import {IMAGE_FIELD_ACCEPT} from '../objects/sectionFields'
 
 export const siteSettings = defineType({
   name: 'siteSettings',
@@ -71,7 +72,7 @@ export const siteSettings = defineType({
       title: 'Footer logo',
       type: 'image',
       group: 'footer',
-      options: {hotspot: true},
+      options: {hotspot: true, accept: IMAGE_FIELD_ACCEPT},
       fields: [
         defineField({
           name: 'alt',
@@ -181,7 +182,7 @@ export const siteSettings = defineType({
       type: 'image',
       description: 'Fallback Open Graph / Twitter image (1200×630 recommended)',
       group: 'seo',
-      options: {hotspot: true},
+      options: {hotspot: true, accept: IMAGE_FIELD_ACCEPT},
       fields: [
         defineField({
           name: 'alt',

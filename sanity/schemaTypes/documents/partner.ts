@@ -1,5 +1,6 @@
 import {UsersIcon} from '@sanity/icons/Users'
 import {defineField, defineType} from 'sanity'
+import {IMAGE_FIELD_ACCEPT} from '../objects/sectionFields'
 
 export const partner = defineType({
   name: 'partner',
@@ -24,7 +25,7 @@ export const partner = defineType({
       name: 'logo',
       title: 'Logo',
       type: 'image',
-      options: {hotspot: true},
+      options: {hotspot: true, accept: IMAGE_FIELD_ACCEPT},
       fields: [
         defineField({
           name: 'alt',
