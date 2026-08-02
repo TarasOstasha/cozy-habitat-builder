@@ -1,5 +1,11 @@
 export type SanityImage = {
-  asset?: { _ref?: string; _id?: string; url?: string } | null;
+  asset?: {
+    _ref?: string;
+    _id?: string;
+    url?: string;
+    width?: number;
+    height?: number;
+  } | null;
   alt?: string | null;
 };
 

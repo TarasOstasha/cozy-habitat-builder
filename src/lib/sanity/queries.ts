@@ -3,7 +3,9 @@ import { defineQuery } from "groq";
 const imageProjection = /* groq */ `
   asset->{
     _id,
-    url
+    url,
+    "width": metadata.dimensions.width,
+    "height": metadata.dimensions.height
   },
   alt
 `;

@@ -71,16 +71,24 @@ function galleryThumbHeight(width: number, aspectRatio = 4 / 3) {
   return Math.round(width / aspectRatio);
 }
 
+export function getImageAspectRatio(image: SanityImage | null | undefined) {
+  const width = image?.asset?.width;
+  const height = image?.asset?.height;
+  if (width && height && height > 0) return width / height;
+  return 4 / 3;
+}
+
 /** Responsive thumb URLs for the grid plus full-size / lightbox-strip variants. */
 export function sanityGalleryImageUrls(
   image: SanityImage | null | undefined,
 ): GalleryImageUrls | null {
   if (!image?.asset) return null;
   try {
+    const aspectRatio = getImageAspectRatio(image);
     const srcSet = GALLERY_THUMB_WIDTHS.map((width) => ({
       src: urlFor(image).width(width).auto("format").quality(70).url(),
       width,
-      height: galleryThumbHeight(width),
+      height: galleryThumbHeight(width, aspectRatio),
     }));
 
     const fallback =

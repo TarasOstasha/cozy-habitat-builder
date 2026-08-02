@@ -34,6 +34,9 @@ export type GalleryImage = {
   fullSrc: string;
   /** Small URL for the lightbox thumbnail strip. */
   thumbSrc?: string;
+  /** Intrinsic dimensions from Sanity (reduces layout shift). */
+  width?: number;
+  height?: number;
 };
 
 export type GalleryCategory = {

@@ -1,30 +1,34 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { RowsPhotoAlbum } from "react-photo-album";
-import Lightbox, { type SlideImage } from "yet-another-react-lightbox";
-import Captions from "yet-another-react-lightbox/plugins/captions";
-import Counter from "yet-another-react-lightbox/plugins/counter";
-import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
-import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import { CategoryDescription } from "@/components/CategoryDescription";
+import type { PortfolioLightboxSlide } from "@/components/PortfolioLightbox";
 import type { GalleryCategory, GalleryImage } from "@/lib/portfolio";
 
 import "react-photo-album/rows.css";
-import "yet-another-react-lightbox/styles.css";
-import "yet-another-react-lightbox/plugins/thumbnails.css";
-import "yet-another-react-lightbox/plugins/captions.css";
-import "yet-another-react-lightbox/plugins/counter.css";
+
+const PortfolioLightbox = lazy(() =>
+  import("@/components/PortfolioLightbox").then((module) => ({
+    default: module.PortfolioLightbox,
+  })),
+);
 
 const VISIBLE_CATEGORIES = 6;
+const TARGET_ROW_HEIGHT = 240;
+const ROW_SPACING = 10;
+/** Eager-load enough photos to cover the first visible row on wide screens. */
+const EAGER_LOAD_COUNT = 6;
+/** High fetch priority for likely LCP candidates in the first row. */
+const HIGH_PRIORITY_COUNT = 3;
 
-/** Aspect presets so the rows layout can pack tightly without real EXIF sizes. */
+/** Fallback aspect presets when Sanity has no dimensions. */
 const ASPECT_PRESETS = [
-  { width: 1600, height: 1200 }, // 4:3
-  { width: 1600, height: 1067 }, // 3:2
-  { width: 1600, height: 1000 }, // 8:5
-  { width: 1600, height: 1200 }, // 4:3
-  { width: 1800, height: 1200 }, // 3:2
-  { width: 1600, height: 900 }, // 16:9
+  { width: 1600, height: 1200 },
+  { width: 1600, height: 1067 },
+  { width: 1600, height: 1000 },
+  { width: 1600, height: 1200 },
+  { width: 1800, height: 1200 },
+  { width: 1600, height: 900 },
 ] as const;
 
 type AlbumPhoto = {
@@ -38,25 +42,31 @@ type AlbumPhoto = {
   thumbSrc?: string;
 };
 
+function resolvePhotoDimensions(image: GalleryImage, index: number) {
+  if (image.width && image.height) {
+    return { width: image.width, height: image.height };
+  }
+  const preset = ASPECT_PRESETS[index % ASPECT_PRESETS.length]!;
+  return { width: preset.width, height: preset.height };
+}
+
 function toAlbumPhotos(images: GalleryImage[]): AlbumPhoto[] {
   return images.map((image, index) => {
-    const preset = ASPECT_PRESETS[index % ASPECT_PRESETS.length]!;
+    const { width, height } = resolvePhotoDimensions(image, index);
     return {
       key: image.key,
       src: image.src,
       srcSet: image.srcSet,
       alt: image.alt,
-      width: preset.width,
-      height: preset.height,
+      width,
+      height,
       fullSrc: image.fullSrc,
       thumbSrc: image.thumbSrc,
     };
   });
 }
 
-type LightboxSlide = SlideImage & { thumbnail?: string };
-
-function toLightboxSlides(photos: AlbumPhoto[]): LightboxSlide[] {
+function toLightboxSlides(photos: AlbumPhoto[]): PortfolioLightboxSlide[] {
   return photos.map((photo) => ({
     src: photo.fullSrc,
     alt: photo.alt,
@@ -67,6 +77,14 @@ function toLightboxSlides(photos: AlbumPhoto[]): LightboxSlide[] {
   }));
 }
 
+/** Reserve vertical space before the album layout finishes to limit footer shift. */
+function estimateAlbumMinHeight(photoCount: number) {
+  if (photoCount === 0) return undefined;
+  const photosPerRow = 3;
+  const rows = Math.ceil(photoCount / photosPerRow);
+  return rows * TARGET_ROW_HEIGHT + Math.max(0, rows - 1) * ROW_SPACING;
+}
+
 type PortfolioGalleryProps = {
   categories: GalleryCategory[];
 };
@@ -75,6 +93,7 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
   const [activeId, setActiveId] = useState(categories[0]?.id ?? "");
   const [startIndex, setStartIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState(-1);
+  const [lightboxMounted, setLightboxMounted] = useState(false);
 
   const maxStart = Math.max(0, categories.length - VISIBLE_CATEGORIES);
   const showCategoryNav = categories.length > VISIBLE_CATEGORIES;
@@ -119,9 +138,18 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
     [activeCategory],
   );
   const slides = useMemo(() => toLightboxSlides(photos), [photos]);
+  const albumMinHeight = useMemo(
+    () => estimateAlbumMinHeight(photos.length),
+    [photos.length],
+  );
 
   const scrollCategoriesBy = (step: number) => {
     setStartIndex((current) => Math.min(maxStart, Math.max(0, current + step)));
+  };
+
+  const openLightbox = (index: number) => {
+    setLightboxMounted(true);
+    setLightboxIndex(index);
   };
 
   if (!activeCategory) return null;
@@ -196,11 +224,14 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
           html={activeCategory.descriptionHtml}
         />
 
-        <div className="portfolio-album mt-14">
+        <div
+          className="portfolio-album mt-14"
+          style={albumMinHeight ? { minHeight: albumMinHeight } : undefined}
+        >
           <RowsPhotoAlbum
             photos={photos}
-            targetRowHeight={240}
-            spacing={10}
+            targetRowHeight={TARGET_ROW_HEIGHT}
+            spacing={ROW_SPACING}
             padding={0}
             sizes={{
               size: "calc(100vw - 48px)",
@@ -209,7 +240,7 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
                 { viewport: "(min-width: 768px)", size: "calc(100vw - 112px)" },
               ],
             }}
-            onClick={({ index }) => setLightboxIndex(index)}
+            onClick={({ index }) => openLightbox(index)}
             componentsProps={{
               container: {
                 className: "portfolio-album__container",
@@ -222,9 +253,9 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
               image: ({ index }) => ({
                 className:
                   "portfolio-album__image transition-transform duration-700 ease-out group-hover:scale-[1.03]",
-                loading: index < 2 ? "eager" : "lazy",
+                loading: index < EAGER_LOAD_COUNT ? "eager" : "lazy",
                 decoding: "async",
-                ...(index === 0 ? { fetchPriority: "high" as const } : {}),
+                ...(index < HIGH_PRIORITY_COUNT ? { fetchPriority: "high" as const } : {}),
               }),
             }}
             render={{
@@ -239,35 +270,16 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
         </div>
       </div>
 
-      <Lightbox
-        open={lightboxIndex >= 0}
-        close={() => setLightboxIndex(-1)}
-        index={lightboxIndex}
-        slides={slides}
-        plugins={[Captions, Counter, Thumbnails, Zoom]}
-        carousel={{ finite: slides.length <= 1, padding: 0 }}
-        animation={{ fade: 320 }}
-        controller={{ closeOnBackdropClick: true }}
-        captions={{ descriptionTextAlign: "center", descriptionMaxLines: 2 }}
-        counter={{ container: { style: { top: 16, bottom: "unset" } } }}
-        thumbnails={{
-          position: "bottom",
-          border: 0,
-          borderRadius: 2,
-          padding: 0,
-          gap: 8,
-          imageFit: "cover",
-        }}
-        zoom={{ maxZoomPixelRatio: 2.5, scrollToZoom: true }}
-        styles={{
-          container: { backgroundColor: "rgba(10, 10, 10, 0.94)" },
-          captionsTitle: {
-            fontFamily: "var(--font-display)",
-            fontWeight: 400,
-            letterSpacing: "-0.01em",
-          },
-        }}
-      />
+      {lightboxMounted && (
+        <Suspense fallback={null}>
+          <PortfolioLightbox
+            open={lightboxIndex >= 0}
+            close={() => setLightboxIndex(-1)}
+            index={Math.max(lightboxIndex, 0)}
+            slides={slides}
+          />
+        </Suspense>
+      )}
     </>
   );
 }

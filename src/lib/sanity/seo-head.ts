@@ -115,6 +115,8 @@ export function galleryFromSanity(
         .map((image, imageIndex) => {
           const urls = sanityGalleryImageUrls(image);
           if (!urls) return null;
+          const assetWidth = image.asset?.width;
+          const assetHeight = image.asset?.height;
           return {
             key: `${id}-${imageIndex}`,
             alt: image.alt || `${label} project ${imageIndex + 1}`,
@@ -122,6 +124,9 @@ export function galleryFromSanity(
             srcSet: urls.srcSet,
             fullSrc: urls.fullSrc,
             thumbSrc: urls.thumbSrc,
+            ...(assetWidth && assetHeight
+              ? { width: assetWidth, height: assetHeight }
+              : {}),
           };
         })
         .filter(
@@ -134,6 +139,8 @@ export function galleryFromSanity(
             srcSet: { src: string; width: number; height: number }[];
             fullSrc: string;
             thumbSrc: string;
+            width?: number;
+            height?: number;
           } => image !== null,
         );
 
