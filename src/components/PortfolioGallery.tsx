@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { RowsPhotoAlbum } from "react-photo-album";
 import { CategoryDescription } from "@/components/CategoryDescription";
 import type { PortfolioLightboxSlide } from "@/components/PortfolioLightbox";
+import { GALLERY_IMAGE_SIZES } from "@/lib/sanity/image";
 import type { GalleryCategory, GalleryImage } from "@/lib/portfolio";
 
 import "react-photo-album/rows.css";
@@ -16,10 +17,26 @@ const PortfolioLightbox = lazy(() =>
 const VISIBLE_CATEGORIES = 6;
 const TARGET_ROW_HEIGHT = 240;
 const ROW_SPACING = 10;
-/** Eager-load enough photos to cover the first visible row on wide screens. */
-const EAGER_LOAD_COUNT = 6;
-/** High fetch priority for likely LCP candidates in the first row. */
-const HIGH_PRIORITY_COUNT = 3;
+const MOBILE_BREAKPOINT = 768;
+
+const GALLERY_LOAD_STRATEGY = {
+  mobile: { eagerCount: 2, highPriorityCount: 1, photosPerRow: 2 },
+  desktop: { eagerCount: 6, highPriorityCount: 3, photosPerRow: 3 },
+} as const;
+
+function useGalleryLoadStrategy() {
+  const [isMobile, setIsMobile] = useState(true);
+
+  useEffect(() => {
+    const media = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  return isMobile ? GALLERY_LOAD_STRATEGY.mobile : GALLERY_LOAD_STRATEGY.desktop;
+}
 
 /** Fallback aspect presets when Sanity has no dimensions. */
 const ASPECT_PRESETS = [
@@ -78,9 +95,8 @@ function toLightboxSlides(photos: AlbumPhoto[]): PortfolioLightboxSlide[] {
 }
 
 /** Reserve vertical space before the album layout finishes to limit footer shift. */
-function estimateAlbumMinHeight(photoCount: number) {
+function estimateAlbumMinHeight(photoCount: number, photosPerRow: number) {
   if (photoCount === 0) return undefined;
-  const photosPerRow = 3;
   const rows = Math.ceil(photoCount / photosPerRow);
   return rows * TARGET_ROW_HEIGHT + Math.max(0, rows - 1) * ROW_SPACING;
 }
@@ -90,6 +106,7 @@ type PortfolioGalleryProps = {
 };
 
 export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
+  const { eagerCount, highPriorityCount, photosPerRow } = useGalleryLoadStrategy();
   const [activeId, setActiveId] = useState(categories[0]?.id ?? "");
   const [startIndex, setStartIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState(-1);
@@ -139,8 +156,8 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
   );
   const slides = useMemo(() => toLightboxSlides(photos), [photos]);
   const albumMinHeight = useMemo(
-    () => estimateAlbumMinHeight(photos.length),
-    [photos.length],
+    () => estimateAlbumMinHeight(photos.length, photosPerRow),
+    [photos.length, photosPerRow],
   );
 
   const scrollCategoriesBy = (step: number) => {
@@ -234,7 +251,7 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
             spacing={ROW_SPACING}
             padding={0}
             sizes={{
-              size: "calc(100vw - 48px)",
+              size: GALLERY_IMAGE_SIZES,
               sizes: [
                 { viewport: "(min-width: 1400px)", size: "1300px" },
                 { viewport: "(min-width: 768px)", size: "calc(100vw - 112px)" },
@@ -253,9 +270,9 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
               image: ({ index }) => ({
                 className:
                   "portfolio-album__image transition-transform duration-700 ease-out group-hover:scale-[1.03]",
-                loading: index < EAGER_LOAD_COUNT ? "eager" : "lazy",
+                loading: index < eagerCount ? "eager" : "lazy",
                 decoding: "async",
-                ...(index < HIGH_PRIORITY_COUNT ? { fetchPriority: "high" as const } : {}),
+                ...(index < highPriorityCount ? { fetchPriority: "high" as const } : {}),
               }),
             }}
             render={{

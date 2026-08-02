@@ -60,6 +60,11 @@ export const GALLERY_THUMB_FALLBACK_WIDTH = 640;
 export const GALLERY_LIGHTBOX_WIDTH = 1920;
 export const GALLERY_LIGHTBOX_THUMB_WIDTH = 120;
 
+/** Matches RowsPhotoAlbum `sizes` on the portfolio page (mobile-first). */
+export const GALLERY_IMAGE_SIZES = "calc(100vw - 48px)";
+
+const GALLERY_THUMB_QUALITY = 70;
+
 export type GalleryImageUrls = {
   src: string;
   srcSet: { src: string; width: number; height: number }[];
@@ -86,7 +91,7 @@ export function sanityGalleryImageUrls(
   try {
     const aspectRatio = getImageAspectRatio(image);
     const srcSet = GALLERY_THUMB_WIDTHS.map((width) => ({
-      src: urlFor(image).width(width).auto("format").quality(70).url(),
+      src: urlFor(image).width(width).auto("format").quality(GALLERY_THUMB_QUALITY).url(),
       width,
       height: galleryThumbHeight(width, aspectRatio),
     }));
@@ -109,6 +114,34 @@ export function sanityGalleryImageUrls(
         .quality(65)
         .url(),
     };
+  } catch {
+    return null;
+  }
+}
+
+/** Mobile-first fallback URL for `<link rel="preload" as="image">`. */
+export function sanityGalleryLcpHref(image: SanityImage | null | undefined): string | null {
+  if (!image?.asset) return null;
+  try {
+    return urlFor(image).width(480).auto("format").quality(GALLERY_THUMB_QUALITY).url();
+  } catch {
+    return null;
+  }
+}
+
+/** Srcset string for preloading responsive gallery thumbs. */
+export function sanityGalleryThumbSrcSetString(
+  image: SanityImage | null | undefined,
+  widths: readonly number[] = GALLERY_THUMB_WIDTHS,
+): string | null {
+  if (!image?.asset) return null;
+  try {
+    return widths
+      .map((width) => {
+        const url = urlFor(image).width(width).auto("format").quality(GALLERY_THUMB_QUALITY).url();
+        return `${url} ${width}w`;
+      })
+      .join(", ");
   } catch {
     return null;
   }

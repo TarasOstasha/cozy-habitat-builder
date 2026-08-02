@@ -4,13 +4,18 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { galleryFromLocal } from "@/lib/portfolio";
 import { defaultPortfolio, defaultSettings, pick } from "@/lib/sanity/defaults";
+import {
+  GALLERY_IMAGE_SIZES,
+  sanityGalleryLcpHref,
+  sanityGalleryThumbSrcSetString,
+} from "@/lib/sanity/image";
 import { loadPortfolioPage } from "@/lib/sanity/load-portfolio-page";
 import { buildSeoHead, galleryFromSanity } from "@/lib/sanity/seo-head";
 
 export const Route = createFileRoute("/portfolio")({
   loader: () => loadPortfolioPage(),
-  head: ({ loaderData }) =>
-    buildSeoHead({
+  head: ({ loaderData }) => {
+    const seo = buildSeoHead({
       seo: loaderData?.portfolio?.seo,
       settings: loaderData?.settings,
       fallbacks: {
@@ -18,7 +23,44 @@ export const Route = createFileRoute("/portfolio")({
         description: defaultPortfolio.seo?.description || undefined,
         twitterCard: defaultPortfolio.seo?.twitterCard || undefined,
       },
-    }),
+    });
+
+    const firstSanityImage = loaderData?.portfolio?.categories?.[0]?.images?.[0];
+    const lcpHref = firstSanityImage
+      ? sanityGalleryLcpHref(firstSanityImage)
+      : (galleryFromLocal()[0]?.images[0]?.src ?? null);
+    const lcpSrcSet = firstSanityImage
+      ? sanityGalleryThumbSrcSetString(firstSanityImage)
+      : null;
+
+    return {
+      ...seo,
+      links: [
+        ...(seo.links ?? []),
+        ...(lcpHref && lcpSrcSet
+          ? [
+              {
+                rel: "preload" as const,
+                as: "image" as const,
+                href: lcpHref,
+                imageSrcSet: lcpSrcSet,
+                imageSizes: GALLERY_IMAGE_SIZES,
+                fetchPriority: "high" as const,
+              },
+            ]
+          : lcpHref
+            ? [
+                {
+                  rel: "preload" as const,
+                  as: "image" as const,
+                  href: lcpHref,
+                  fetchPriority: "high" as const,
+                },
+              ]
+            : []),
+      ],
+    };
+  },
   component: PortfolioPage,
 });
 
