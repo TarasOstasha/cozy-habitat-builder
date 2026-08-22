@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { sendContactEmail } from "@/lib/contact/send-contact-email";
 import { defaultSettings, pick } from "@/lib/sanity/defaults";
 
 type ContactFormProps = {
@@ -18,6 +19,8 @@ export function ContactForm({
   submitLabel,
 }: ContactFormProps) {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const isDesigner = intent === "designer";
   const contactEmail = pick(email, defaultSettings.email!);
   const placeholder = pick(
@@ -28,42 +31,52 @@ export function ContactForm({
   );
   const buttonLabel = pick(submitLabel, "Send Message");
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
 
-    const name = String(data.get("name") ?? "");
-    const senderEmail = String(data.get("email") ?? "");
-    const phone = String(data.get("phone") ?? "");
-    const company = String(data.get("company") ?? "");
-    const message = String(data.get("message") ?? "");
+    const name = String(data.get("name") ?? "").trim();
+    const senderEmail = String(data.get("email") ?? "").trim();
+    const phone = String(data.get("phone") ?? "").trim();
+    const company = String(data.get("company") ?? "").trim();
+    const message = String(data.get("message") ?? "").trim();
 
-    const subject = isDesigner ? `Designer Inquiry - ${name}` : `Contact Inquiry - ${name}`;
+    setError(null);
+    setIsSubmitting(true);
 
-    const body = [
-      `Name: ${name}`,
-      `Email: ${senderEmail}`,
-      phone ? `Phone: ${phone}` : null,
-      company ? `Company: ${company}` : null,
-      "",
-      message,
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    window.location.href = `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    setSubmitted(true);
-    form.reset();
+    try {
+      await sendContactEmail({
+        data: {
+          intent,
+          name,
+          email: senderEmail,
+          phone: phone || undefined,
+          company: company || undefined,
+          message,
+        },
+      });
+      setSubmitted(true);
+      form.reset();
+    } catch (err) {
+      console.error("Contact form submit failed", err);
+      setError(
+        err instanceof Error && err.message
+          ? err.message
+          : "Something went wrong. Please try again or email us directly.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   if (submitted) {
     return (
       <div className="border border-border/60 bg-secondary/20 px-8 py-10 text-center">
         <span className="eyebrow">Thank you</span>
-        <p className="mt-4 font-display text-2xl">Your message is ready to send.</p>
+        <p className="mt-4 font-display text-2xl">Your message has been sent.</p>
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-          Your email app should open with your message. If it did not, reach us directly at{" "}
+          We’ll get back to you soon. Prefer to reach us directly? Email{" "}
           <a href={`mailto:${contactEmail}`} className="link-underline">
             {contactEmail}
           </a>
@@ -92,6 +105,7 @@ export function ContactForm({
             name="name"
             required
             autoComplete="name"
+            disabled={isSubmitting}
             className="h-11 rounded-none border-border/80 bg-transparent"
           />
         </div>
@@ -105,6 +119,7 @@ export function ContactForm({
             type="email"
             required
             autoComplete="email"
+            disabled={isSubmitting}
             className="h-11 rounded-none border-border/80 bg-transparent"
           />
         </div>
@@ -120,6 +135,7 @@ export function ContactForm({
             name="phone"
             type="tel"
             autoComplete="tel"
+            disabled={isSubmitting}
             className="h-11 rounded-none border-border/80 bg-transparent"
           />
         </div>
@@ -131,6 +147,7 @@ export function ContactForm({
             <Input
               id={`${intent}-company`}
               name="company"
+              disabled={isSubmitting}
               className="h-11 rounded-none border-border/80 bg-transparent"
             />
           </div>
@@ -147,15 +164,27 @@ export function ContactForm({
           required
           rows={5}
           placeholder={placeholder}
+          disabled={isSubmitting}
           className="min-h-[140px] resize-none rounded-none border-border/80 bg-transparent"
         />
       </div>
 
+      {error ? (
+        <p className="text-sm leading-relaxed text-destructive" role="alert">
+          {error} You can also email{" "}
+          <a href={`mailto:${contactEmail}`} className="link-underline">
+            {contactEmail}
+          </a>
+          .
+        </p>
+      ) : null}
+
       <button
         type="submit"
-        className="inline-flex w-full items-center justify-center bg-[color:var(--color-gold)] px-7 py-3.5 text-sm font-medium tracking-[0.15em] uppercase text-black transition-colors hover:bg-[color:var(--color-gold-hover)] sm:w-auto"
+        disabled={isSubmitting}
+        className="inline-flex w-full items-center justify-center bg-[color:var(--color-gold)] px-7 py-3.5 text-sm font-medium tracking-[0.15em] uppercase text-black transition-colors hover:bg-[color:var(--color-gold-hover)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
       >
-        {buttonLabel}
+        {isSubmitting ? "Sending…" : buttonLabel}
       </button>
     </form>
   );

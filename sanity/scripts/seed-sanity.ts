@@ -53,7 +53,7 @@ const siteSettings = {
   ],
   phoneDisplay: '+1 (917) 705 0712',
   phoneHref: '+19177050712',
-  email: 'semtaccd@gmail.com',
+  email: 'info@semtaccd.com',
   addressLine1: '257 Ely Ave',
   addressLine2: 'Norwalk, CT 06854',
   siteUrl: 'https://www.semtaccd.shop',
