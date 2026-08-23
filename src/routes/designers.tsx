@@ -29,7 +29,7 @@ function DesignersPage() {
     d.highlights && d.highlights.length > 0 ? d.highlights : defaultDesigners.highlights!;
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
       <SiteHeader
         brandName={s.brandName}
         brandTagline={s.brandTagline}
@@ -39,7 +39,7 @@ function DesignersPage() {
         headerNavLinks={s.headerNavLinks}
       />
 
-      <main className="px-6 py-20 md:px-14 md:py-28">
+      <main className="flex-1 px-6 py-20 md:px-14 md:py-28">
         <div className="mx-auto grid max-w-[1100px] grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-20">
           <div>
             <span className="eyebrow">{pick(d.eyebrow, defaultDesigners.eyebrow!)}</span>

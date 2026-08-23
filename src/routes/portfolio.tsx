@@ -74,7 +74,7 @@ function PortfolioPage() {
     categoriesFromSanity.length > 0 ? categoriesFromSanity : galleryFromLocal();
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
       <SiteHeader
         brandName={s.brandName}
         brandTagline={s.brandTagline}
@@ -84,7 +84,7 @@ function PortfolioPage() {
         headerNavLinks={s.headerNavLinks}
       />
 
-      <main className="px-6 py-20 md:px-14 md:py-28">
+      <main className="flex-1 px-6 py-20 md:px-14 md:py-28">
         <div className="mx-auto max-w-[1400px]">
           <div className="mx-auto max-w-2xl text-center">
             <span className="eyebrow">{pick(p.eyebrow, defaultPortfolio.eyebrow!)}</span>
