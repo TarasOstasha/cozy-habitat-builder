@@ -88,22 +88,30 @@ export function WorkPreview({
           ))}
         </div>
 
-        <div className="mt-14 text-center">
+        <div className="mx-auto mt-14 flex w-full max-w-sm flex-col items-stretch gap-3 md:max-w-none md:flex-row md:items-center md:justify-center md:gap-0">
           {onViewAll ? (
             <button
               type="button"
               onClick={onViewAll}
-              className="eyebrow link-underline inline-block cursor-pointer"
+              className="inline-flex cursor-pointer items-center justify-center bg-[color:var(--color-gold)] px-7 py-3.5 text-sm font-medium tracking-[0.15em] uppercase text-black transition-colors hover:bg-[color:var(--color-gold-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:ring-offset-2 md:bg-transparent md:px-0 md:py-0 md:text-[0.7rem] md:tracking-[var(--tracking-brand)] md:text-[color:var(--color-gold-deep)] md:hover:bg-transparent md:focus-visible:ring-0 md:link-underline"
             >
               {pick(viewPortfolioLabel, defaults.viewPortfolioLabel!)}
             </button>
           ) : (
-            <a href="#portfolio" className="eyebrow link-underline inline-block">
+            <a
+              href="#portfolio"
+              className="inline-flex items-center justify-center bg-[color:var(--color-gold)] px-7 py-3.5 text-sm font-medium tracking-[0.15em] uppercase text-black transition-colors hover:bg-[color:var(--color-gold-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:ring-offset-2 md:bg-transparent md:px-0 md:py-0 md:text-[0.7rem] md:tracking-[var(--tracking-brand)] md:text-[color:var(--color-gold-deep)] md:hover:bg-transparent md:focus-visible:ring-0 md:link-underline"
+            >
               {pick(viewPortfolioLabel, defaults.viewPortfolioLabel!)}
             </a>
           )}
-          <span className="mx-4 text-muted-foreground/40">·</span>
-          <Link to="/portfolio" className="eyebrow link-underline inline-block">
+          <span className="mx-4 hidden text-muted-foreground/40 md:inline" aria-hidden="true">
+            ·
+          </span>
+          <Link
+            to="/portfolio"
+            className="inline-flex items-center justify-center border border-[color:var(--color-gold)]/55 bg-transparent px-7 py-3.5 text-sm font-medium tracking-[0.15em] uppercase text-[color:var(--color-gold-deep)] transition-colors hover:border-[color:var(--color-gold)] hover:bg-[color:var(--color-gold)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:ring-offset-2 md:border-0 md:px-0 md:py-0 md:text-[0.7rem] md:tracking-[var(--tracking-brand)] md:hover:border-transparent md:hover:bg-transparent md:focus-visible:ring-0 md:link-underline"
+          >
             {pick(browseAllLabel, defaults.browseAllLabel!)}
           </Link>
         </div>
