@@ -20,8 +20,8 @@ const MOBILE_BREAKPOINT = 768;
 const TAB_SCROLL_STEP = 160;
 
 const GALLERY_LOAD_STRATEGY = {
-  mobile: { eagerCount: 2, highPriorityCount: 1, photosPerRow: 2 },
-  desktop: { eagerCount: 6, highPriorityCount: 3, photosPerRow: 3 },
+  mobile: { eagerCount: 2, highPriorityCount: 1 },
+  desktop: { eagerCount: 6, highPriorityCount: 3 },
 } as const;
 
 function useGalleryLoadStrategy() {
@@ -145,19 +145,12 @@ function toLightboxSlides(photos: AlbumPhoto[]): PortfolioLightboxSlide[] {
   }));
 }
 
-/** Reserve vertical space before the album layout finishes to limit footer shift. */
-function estimateAlbumMinHeight(photoCount: number, photosPerRow: number) {
-  if (photoCount === 0) return undefined;
-  const rows = Math.ceil(photoCount / photosPerRow);
-  return rows * TARGET_ROW_HEIGHT + Math.max(0, rows - 1) * ROW_SPACING;
-}
-
 type PortfolioGalleryProps = {
   categories: GalleryCategory[];
 };
 
 export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
-  const { eagerCount, highPriorityCount, photosPerRow } = useGalleryLoadStrategy();
+  const { eagerCount, highPriorityCount } = useGalleryLoadStrategy();
   const {
     tabListRef,
     canScrollPrev,
@@ -198,10 +191,6 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
     [activeCategory],
   );
   const slides = useMemo(() => toLightboxSlides(photos), [photos]);
-  const albumMinHeight = useMemo(
-    () => estimateAlbumMinHeight(photos.length, photosPerRow),
-    [photos.length, photosPerRow],
-  );
 
   const scrollCategoriesBy = (step: number) => {
     scrollTabsBy(step < 0 ? -1 : 1);
@@ -287,10 +276,7 @@ export function PortfolioGallery({ categories }: PortfolioGalleryProps) {
           html={activeCategory.descriptionHtml}
         />
 
-        <div
-          className="portfolio-album mt-14"
-          style={albumMinHeight ? { minHeight: albumMinHeight } : undefined}
-        >
+        <div className="portfolio-album mt-14">
           <RowsPhotoAlbum
             photos={photos}
             targetRowHeight={TARGET_ROW_HEIGHT}
