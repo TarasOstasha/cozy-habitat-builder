@@ -12,9 +12,20 @@ type SeoHeadInput = {
   };
 };
 
+/** Accepts a bare GTM container ID or a pasted GTM snippet. */
+export function parseGoogleTagManagerId(snippet?: string | null): string | null {
+  if (!snippet?.trim()) return null;
+  const trimmed = snippet.trim();
+  if (/^GTM-[A-Z0-9]+$/i.test(trimmed)) return trimmed.toUpperCase();
+  const match = trimmed.match(/\bGTM-[A-Z0-9]+\b/i);
+  return match?.[0]?.toUpperCase() ?? null;
+}
+
 /** Accepts a bare Measurement ID or a pasted gtag.js snippet. */
 export function parseGoogleAnalyticsId(snippet?: string | null): string | null {
   if (!snippet?.trim()) return null;
+  // Prefer GTM when the pasted snippet is a Tag Manager install.
+  if (parseGoogleTagManagerId(snippet)) return null;
   const trimmed = snippet.trim();
   if (/^(G|GT|AW)-[A-Z0-9]+$/i.test(trimmed) || /^UA-\d+-\d+$/i.test(trimmed)) {
     return trimmed.toUpperCase();
@@ -23,7 +34,17 @@ export function parseGoogleAnalyticsId(snippet?: string | null): string | null {
   return match?.[1]?.toUpperCase() ?? null;
 }
 
-function googleAnalyticsScripts(snippet?: string | null) {
+/** Head scripts for GTM (preferred) or gtag.js Analytics. */
+export function googleTrackingScripts(snippet?: string | null) {
+  const gtmId = parseGoogleTagManagerId(snippet);
+  if (gtmId) {
+    return [
+      {
+        children: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`,
+      },
+    ];
+  }
+
   const id = parseGoogleAnalyticsId(snippet);
   if (!id) return undefined;
 
@@ -87,7 +108,6 @@ export function buildSeoHead({ seo, settings, fallbacks }: SeoHeadInput) {
         : []),
     ],
     links: canonicalUrl ? [{ rel: "canonical", href: canonicalUrl }] : undefined,
-    scripts: googleAnalyticsScripts(settings?.googleAnalyticsSnippet),
   };
 }
 

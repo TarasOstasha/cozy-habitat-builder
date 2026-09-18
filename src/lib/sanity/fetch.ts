@@ -9,20 +9,20 @@ import type { SiteSettings } from "./types";
 
 export { loadDesignersPage, loadHomePage, loadPortfolioPage };
 
+export async function loadSiteSettings(): Promise<SiteSettings> {
+  try {
+    const settings = await sanityClient.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY);
+    return settings ?? defaultSettings;
+  } catch (error) {
+    console.error("Failed to fetch Sanity site settings", error);
+    return defaultSettings;
+  }
+}
+
 export const fetchHomePage = createServerFn({ method: "GET" }).handler(loadHomePage);
 
 export const fetchPortfolioPage = createServerFn({ method: "GET" }).handler(loadPortfolioPage);
 
 export const fetchDesignersPage = createServerFn({ method: "GET" }).handler(loadDesignersPage);
 
-export const fetchSiteSettings = createServerFn({ method: "GET" }).handler(
-  async (): Promise<SiteSettings> => {
-    try {
-      const settings = await sanityClient.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY);
-      return settings ?? defaultSettings;
-    } catch (error) {
-      console.error("Failed to fetch Sanity site settings", error);
-      return defaultSettings;
-    }
-  },
-);
+export const fetchSiteSettings = createServerFn({ method: "GET" }).handler(loadSiteSettings);

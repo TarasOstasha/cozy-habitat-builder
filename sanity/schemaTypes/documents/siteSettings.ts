@@ -208,12 +208,12 @@ export const siteSettings = defineType({
     }),
     defineField({
       name: 'googleAnalyticsSnippet',
-      title: 'Google Analytics snippet',
+      title: 'Google Analytics / Tag Manager',
       type: 'text',
       rows: 8,
       group: 'seo',
       description:
-        'Paste your Google Analytics (gtag.js) snippet from Google, or just the Measurement ID (e.g. G-XXXXXXXX). Injected site-wide in the document head.',
+        'Paste a Google Tag Manager snippet (or just GTM-XXXXXXX), a Google Analytics gtag.js snippet, or a Measurement ID (G-XXXXXXXX). Injected site-wide: GTM gets the head script + body noscript; Analytics gets gtag.js in the head.',
     }),
   ],
   preview: {

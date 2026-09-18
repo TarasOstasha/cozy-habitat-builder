@@ -4,12 +4,19 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
 import { defaultSettings } from "@/lib/sanity/defaults";
+import { loadSiteSettings } from "@/lib/sanity/fetch";
+import {
+  googleTrackingScripts,
+  parseGoogleTagManagerId,
+} from "@/lib/sanity/seo-head";
+import type { SiteSettings } from "@/lib/sanity/types";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -74,51 +81,88 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: defaultSettings.seoTitle! },
-      { name: "description", content: defaultSettings.seoDescription! },
-      { name: "author", content: defaultSettings.brandName! },
-      { property: "og:title", content: defaultSettings.seoTitle! },
-      { property: "og:description", content: defaultSettings.seoDescription! },
-      { property: "og:type", content: "website" },
-      { property: "og:site_name", content: defaultSettings.ogSiteName! },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [
-      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
-      { rel: "icon", href: "/favicon.ico", sizes: "any" },
-      { rel: "icon", href: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
-      { rel: "preconnect", href: "https://cdn.sanity.io", crossOrigin: "anonymous" },
-      { rel: "dns-prefetch", href: "https://cdn.sanity.io" },
-      {
-        rel: "preload",
-        href: "/fonts/inter-latin.woff2",
-        as: "font",
-        type: "font/woff2",
-        crossOrigin: "anonymous",
-      },
-      {
-        rel: "preload",
-        href: "/fonts/cormorant-garamond-latin-400.woff2",
-        as: "font",
-        type: "font/woff2",
-        crossOrigin: "anonymous",
-      },
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-    ],
-  }),
+  loader: async () => {
+    const settings = await loadSiteSettings();
+    return { settings };
+  },
+  head: ({ loaderData }) => {
+    const scripts = googleTrackingScripts(loaderData?.settings?.googleAnalyticsSnippet);
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { title: defaultSettings.seoTitle! },
+        { name: "description", content: defaultSettings.seoDescription! },
+        { name: "author", content: defaultSettings.brandName! },
+        { property: "og:title", content: defaultSettings.seoTitle! },
+        { property: "og:description", content: defaultSettings.seoDescription! },
+        { property: "og:type", content: "website" },
+        { property: "og:site_name", content: defaultSettings.ogSiteName! },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [
+        { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+        { rel: "icon", href: "/favicon.ico", sizes: "any" },
+        { rel: "icon", href: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+        { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
+        { rel: "preconnect", href: "https://cdn.sanity.io", crossOrigin: "anonymous" },
+        { rel: "dns-prefetch", href: "https://cdn.sanity.io" },
+        {
+          rel: "preload",
+          href: "/fonts/inter-latin.woff2",
+          as: "font",
+          type: "font/woff2",
+          crossOrigin: "anonymous",
+        },
+        {
+          rel: "preload",
+          href: "/fonts/cormorant-garamond-latin-400.woff2",
+          as: "font",
+          type: "font/woff2",
+          crossOrigin: "anonymous",
+        },
+        {
+          rel: "stylesheet",
+          href: appCss,
+        },
+      ],
+      // Root head scripts are merged across every matched route (home, portfolio, designers, 404, etc.)
+      ...(scripts ? { scripts } : {}),
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
+
+function useRootGtmId() {
+  const snippet = useRouterState({
+    select: (state) => {
+      const rootMatch = state.matches.find((match) => match.routeId === "__root__");
+      const data = rootMatch?.loaderData as { settings?: SiteSettings } | undefined;
+      return data?.settings?.googleAnalyticsSnippet ?? null;
+    },
+  });
+  return parseGoogleTagManagerId(snippet);
+}
+
+function GtmNoscript() {
+  const gtmId = useRootGtmId();
+  if (!gtmId) return null;
+
+  return (
+    <noscript>
+      <iframe
+        src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+        height="0"
+        width="0"
+        style={{ display: "none", visibility: "hidden" }}
+        title="Google Tag Manager"
+      />
+    </noscript>
+  );
+}
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
@@ -127,6 +171,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <GtmNoscript />
         {children}
         <Scripts />
       </body>
