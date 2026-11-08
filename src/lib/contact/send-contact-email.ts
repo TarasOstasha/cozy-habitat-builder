@@ -88,8 +88,8 @@ export const sendContactEmail = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const apiKey = process.env.SEMTACCD_EMAIL_API?.trim();
     const from =
-      process.env.RESEND_FROM_EMAIL?.trim() || "SEMTA <info@semtaccd.com>";
-    const to = process.env.RESEND_TO_EMAIL?.trim() || "info@semtaccd.com";
+      process.env.RESEND_FROM_EMAIL?.trim() || "SEMTA <info@semtaccm.com>";
+    const to = process.env.RESEND_TO_EMAIL?.trim() || "info@semtaccm.com";
 
     if (!apiKey) {
       throw new Error("Email is not configured (missing SEMTACCD_EMAIL_API).");
